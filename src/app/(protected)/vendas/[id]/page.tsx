@@ -22,7 +22,7 @@ export default async function VendaDetalhePage({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="page-stack">
       <PageHeader
         title={`Venda de ${formatSaleDate(sale.sale_date)}`}
         description={`Cliente: ${sale.customer_name}`}

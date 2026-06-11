@@ -23,7 +23,7 @@ export default async function ProdutoDetalhePage({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="page-stack">
       <PageHeader
         title={product.name}
         description="Detalhes do produto e controle de estoque."

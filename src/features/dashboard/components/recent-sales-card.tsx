@@ -60,6 +60,7 @@ export function RecentSalesCard({ sales }: RecentSalesCardProps) {
   if (sales.length === 0) {
     return (
       <EmptyState
+        className="border-0 bg-transparent shadow-none"
         title="Nenhuma venda registrada"
         description="As vendas recentes aparecerão aqui após o primeiro registro."
       />
@@ -68,6 +69,7 @@ export function RecentSalesCard({ sales }: RecentSalesCardProps) {
 
   return (
     <DataTable
+      className="border-0 bg-transparent shadow-none"
       columns={columns}
       data={sales}
       getRowKey={(sale) => sale.id}

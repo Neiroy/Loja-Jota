@@ -25,7 +25,7 @@ export default async function ClientesPage({
   const hasFilters = Boolean(filters.search) || filters.status !== 'all';
 
   return (
-    <div className="space-y-6">
+    <div className="page-stack">
       <PageHeader
         title="Clientes"
         description="Cadastro e histórico financeiro dos clientes da loja."

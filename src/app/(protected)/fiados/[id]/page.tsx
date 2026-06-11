@@ -20,7 +20,7 @@ export default async function FiadoDetalhePage({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="page-stack">
       <PageHeader
         title={`Fiado de ${receivable.customer_name}`}
         description={`Vencimento em ${formatReceivableDate(receivable.due_date)}`}

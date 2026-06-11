@@ -25,7 +25,7 @@ export default async function ProdutosPage({
   const hasFilters = Boolean(filters.search) || filters.status !== 'all';
 
   return (
-    <div className="space-y-6">
+    <div className="page-stack">
       <PageHeader
         title="Produtos"
         description="Controle de estoque e catálogo interno de produtos."

@@ -131,10 +131,34 @@
 
 @layer components {
   .surface-card {
-    @apply rounded-xl border border-stone-200/80 bg-white shadow-sm;
+    @apply rounded-xl border border-stone-200/70 bg-white shadow-[0_1px_2px_rgba(28,25,23,0.04),0_4px_20px_rgba(28,25,23,0.05)];
   }
 
   .surface-muted {
     @apply bg-stone-50/80;
+  }
+
+  .auth-shell {
+    background-color: #f7f6f3;
+    background-image:
+      radial-gradient(
+        ellipse 90% 70% at 50% -20%,
+        rgba(231, 229, 228, 0.55),
+        transparent 70%
+      ),
+      radial-gradient(
+        ellipse 50% 45% at 100% 100%,
+        rgba(214, 211, 209, 0.25),
+        transparent 65%
+      ),
+      radial-gradient(
+        ellipse 40% 40% at 0% 80%,
+        rgba(231, 229, 228, 0.3),
+        transparent 60%
+      );
+  }
+
+  .page-stack {
+    @apply space-y-7;
   }
 }

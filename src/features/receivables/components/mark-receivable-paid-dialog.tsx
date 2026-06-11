@@ -5,6 +5,7 @@ import { useState, useTransition } from 'react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import {
   Dialog,
   DialogContent,
@@ -85,7 +86,12 @@ export function MarkReceivablePaidDialog({
             {SETTLEMENT_OPTIONS.map((method) => (
               <label
                 key={method}
-                className="flex cursor-pointer items-center gap-2 rounded-lg border border-stone-200/80 px-3 py-2 text-sm"
+                className={cn(
+                  'flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 text-sm transition-colors',
+                  paymentMethod === method
+                    ? 'border-stone-900 bg-stone-900 text-white shadow-sm'
+                    : 'border-stone-200/70 bg-white text-stone-700 hover:bg-stone-50'
+                )}
               >
                 <input
                   type="radio"

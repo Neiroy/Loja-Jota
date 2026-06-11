@@ -24,7 +24,7 @@ export default async function FiadosPage({ searchParams }: FiadosPageProps) {
     Boolean(filters.search) || (filters.status ?? 'all') !== 'all';
 
   return (
-    <div className="space-y-6">
+    <div className="page-stack">
       <PageHeader
         title="Fiados"
         description="Controle de contas a receber com vencimento em 30 dias."

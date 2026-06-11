@@ -3,10 +3,10 @@ import { NAV_ITEMS } from '@/lib/constants/navigation';
 
 function SidebarBrand() {
   return (
-    <div className="flex h-14 items-center gap-3 border-b border-stone-200/80 px-5">
+    <div className="flex h-[4.25rem] items-center gap-3.5 border-b border-stone-200/60 px-5">
       <div
         aria-hidden
-        className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-stone-900 text-[11px] font-semibold tracking-wide text-white"
+        className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-stone-900 text-xs font-semibold tracking-wide text-white shadow-[0_2px_8px_rgba(28,25,23,0.2)]"
       >
         LJ
       </div>
@@ -24,9 +24,9 @@ function SidebarBrand() {
 
 export function Sidebar() {
   return (
-    <aside className="hidden w-64 shrink-0 flex-col border-r border-stone-200/80 bg-white lg:flex">
+    <aside className="hidden w-[17rem] shrink-0 flex-col border-r border-stone-200/60 bg-white/95 shadow-[1px_0_24px_rgba(28,25,23,0.03)] lg:flex">
       <SidebarBrand />
-      <nav className="flex flex-1 flex-col gap-0.5 p-3">
+      <nav className="flex flex-1 flex-col gap-1 p-4">
         {NAV_ITEMS.map((item) => (
           <SidebarNavLink key={item.href} item={item} />
         ))}

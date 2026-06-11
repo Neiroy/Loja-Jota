@@ -22,7 +22,7 @@ export default async function NovaVendaPage() {
     !loadError && (customers.length === 0 || products.length === 0);
 
   return (
-    <div className="space-y-6">
+    <div className="page-stack">
       <PageHeader
         title="Nova venda"
         description="Registre uma venda interna com cliente, itens, desconto e forma de pagamento."

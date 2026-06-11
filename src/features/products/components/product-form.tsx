@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useActionState } from 'react';
+import { useActionState, useState } from 'react';
 
 import {
   createProductAction,
@@ -9,6 +9,13 @@ import {
 } from '@/features/products/actions/product.actions';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import {
+  maskCurrencyBR,
+  numberToCurrencyMask,
+  onlyIntegerString,
+  parseCurrencyBRToNumber,
+  parseNonNegativeInteger,
+} from '@/lib/masks';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { FormSection } from '@/components/shared/form-section';
@@ -27,6 +34,15 @@ export function ProductForm({ mode, product, cancelHref }: ProductFormProps) {
       : updateProductAction.bind(null, product!.id);
 
   const [state, formAction, isPending] = useActionState(action, null);
+  const [salePriceDisplay, setSalePriceDisplay] = useState(() =>
+    product?.sale_price != null ? numberToCurrencyMask(product.sale_price) : ''
+  );
+  const [stockDisplay, setStockDisplay] = useState(() =>
+    String(product?.stock_quantity ?? 0)
+  );
+
+  const salePriceValue = parseCurrencyBRToNumber(salePriceDisplay);
+  const stockValue = parseNonNegativeInteger(stockDisplay);
 
   return (
     <FormSection
@@ -36,10 +52,13 @@ export function ProductForm({ mode, product, cancelHref }: ProductFormProps) {
       <form
         action={formAction}
         className={cn(
-          'space-y-4',
+          'space-y-5',
           isPending && 'pointer-events-none opacity-80'
         )}
       >
+        <input type="hidden" name="sale_price" value={salePriceValue} />
+        <input type="hidden" name="stock_quantity" value={stockValue} />
+
         <div className="space-y-2">
           <Label htmlFor="name">Nome *</Label>
           <Input
@@ -76,7 +95,7 @@ export function ProductForm({ mode, product, cancelHref }: ProductFormProps) {
           ) : null}
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-5 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="size">Tamanho</Label>
             <Input
@@ -112,17 +131,17 @@ export function ProductForm({ mode, product, cancelHref }: ProductFormProps) {
           </div>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-5 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="sale_price">Preço de venda *</Label>
+            <Label htmlFor="sale_price_display">Preço de venda *</Label>
             <Input
-              id="sale_price"
-              name="sale_price"
-              type="number"
-              min="0"
-              step="0.01"
-              defaultValue={product?.sale_price ?? ''}
-              placeholder="0,00"
+              id="sale_price_display"
+              inputMode="numeric"
+              value={salePriceDisplay}
+              onChange={(event) =>
+                setSalePriceDisplay(maskCurrencyBR(event.target.value))
+              }
+              placeholder="R$ 0,00"
               aria-invalid={Boolean(state?.fieldErrors?.sale_price)}
               disabled={isPending}
               required
@@ -135,14 +154,16 @@ export function ProductForm({ mode, product, cancelHref }: ProductFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="stock_quantity">Quantidade em estoque *</Label>
+            <Label htmlFor="stock_quantity_display">
+              Quantidade em estoque *
+            </Label>
             <Input
-              id="stock_quantity"
-              name="stock_quantity"
-              type="number"
-              min="0"
-              step="1"
-              defaultValue={product?.stock_quantity ?? 0}
+              id="stock_quantity_display"
+              inputMode="numeric"
+              value={stockDisplay}
+              onChange={(event) =>
+                setStockDisplay(onlyIntegerString(event.target.value))
+              }
               placeholder="0"
               aria-invalid={Boolean(state?.fieldErrors?.stock_quantity)}
               disabled={isPending}
@@ -176,7 +197,7 @@ export function ProductForm({ mode, product, cancelHref }: ProductFormProps) {
           <p className="text-destructive text-sm">{state.error}</p>
         ) : null}
 
-        <div className="flex flex-col gap-2 pt-2 sm:flex-row">
+        <div className="flex flex-col-reverse gap-3 border-t border-stone-200/60 pt-6 sm:flex-row sm:justify-start">
           <Button type="submit" disabled={isPending}>
             {isPending
               ? 'Salvando...'

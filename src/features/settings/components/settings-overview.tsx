@@ -33,7 +33,9 @@ function SettingsSection({
   children,
 }: SettingsSectionProps) {
   return (
-    <section className={cn(surfaceCardClassName, 'space-y-5 p-6')}>
+    <section
+      className={cn(surfaceCardClassName, 'space-y-6 p-6 sm:p-7 lg:p-8')}
+    >
       <div className="space-y-1">
         <h2 className="flex items-center gap-2 text-lg font-semibold text-stone-900">
           <span className="rounded-lg bg-stone-100/80 p-2 text-stone-600">

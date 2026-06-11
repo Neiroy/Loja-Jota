@@ -27,7 +27,7 @@ export default async function VendasPage({ searchParams }: VendasPageProps) {
     filters.payment_status !== 'all';
 
   return (
-    <div className="space-y-6">
+    <div className="page-stack">
       <PageHeader
         title="Vendas"
         description="Registro interno de vendas da loja."

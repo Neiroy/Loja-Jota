@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 
 export default function ProtectedNotFound() {
   return (
-    <div className="space-y-6">
+    <div className="page-stack">
       <PageHeader
         title="Página não encontrada"
         description="O endereço acessado não existe ou o registro foi removido."

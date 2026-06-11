@@ -6,7 +6,7 @@ export default async function ConfiguracoesPage() {
   const overview = await getSettingsOverview();
 
   return (
-    <div className="space-y-6">
+    <div className="page-stack">
       <PageHeader
         title="Configurações"
         description="Preferências e informações do sistema interno da loja."

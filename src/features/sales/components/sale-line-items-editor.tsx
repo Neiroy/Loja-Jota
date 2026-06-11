@@ -3,6 +3,8 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { onlyIntegerString, parsePositiveInteger } from '@/lib/masks';
+import { fieldControlClassName } from '@/lib/surface';
 import type { CreateSaleItemInput } from '@/schemas/sale.schema';
 import type { Product } from '@/types/product.types';
 
@@ -59,7 +61,7 @@ export function SaleLineItemsEditor({
       {items.map((item, index) => (
         <div
           key={`sale-item-${index}`}
-          className="grid gap-3 rounded-lg border border-stone-200/80 p-4 sm:grid-cols-[1fr_120px_auto]"
+          className="grid gap-4 rounded-xl border border-stone-200/70 bg-stone-50/40 p-4 sm:grid-cols-[1fr_120px_auto]"
         >
           <div className="space-y-2">
             <Label htmlFor={`product_id_${index}`}>Produto *</Label>
@@ -70,7 +72,7 @@ export function SaleLineItemsEditor({
                 updateItem(index, { product_id: event.target.value })
               }
               disabled={disabled}
-              className="border-input focus-visible:border-ring focus-visible:ring-ring/50 h-8 w-full rounded-lg border bg-transparent px-2.5 text-sm outline-none focus-visible:ring-3 disabled:opacity-50"
+              className={fieldControlClassName}
             >
               <option value="">Selecione um produto</option>
               {products.map((product) => (
@@ -85,15 +87,19 @@ export function SaleLineItemsEditor({
             <Label htmlFor={`quantity_${index}`}>Quantidade *</Label>
             <Input
               id={`quantity_${index}`}
-              type="number"
-              min="1"
-              step="1"
-              value={item.quantity}
+              inputMode="numeric"
+              value={String(item.quantity)}
               onChange={(event) =>
                 updateItem(index, {
-                  quantity: Number(event.target.value),
+                  quantity: parsePositiveInteger(event.target.value, 1),
                 })
               }
+              onBlur={(event) => {
+                const normalized = onlyIntegerString(event.target.value);
+                updateItem(index, {
+                  quantity: parsePositiveInteger(normalized, 1),
+                });
+              }}
               disabled={disabled}
             />
           </div>

@@ -24,7 +24,7 @@ export default async function ClienteDetalhePage({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="page-stack">
       <PageHeader
         title={customer.name}
         description="Detalhes do cliente e histórico financeiro."

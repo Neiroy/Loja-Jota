@@ -58,6 +58,7 @@ export function UpcomingReceivablesCard({
   if (receivables.length === 0) {
     return (
       <EmptyState
+        className="border-0 bg-transparent shadow-none"
         title="Nenhum fiado próximo do vencimento"
         description="Não há fiados em aberto vencendo nos próximos 7 dias."
       />
@@ -66,6 +67,7 @@ export function UpcomingReceivablesCard({
 
   return (
     <DataTable
+      className="border-0 bg-transparent shadow-none"
       columns={columns}
       data={receivables}
       getRowKey={(receivable) => receivable.id}

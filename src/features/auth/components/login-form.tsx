@@ -39,7 +39,7 @@ export function LoginForm() {
   }, [state, router, redirectTo]);
 
   return (
-    <form action={formAction} className="space-y-5">
+    <form action={formAction} className="space-y-6">
       <div className="space-y-2">
         <Label htmlFor="email">E-mail</Label>
         <Input
@@ -47,6 +47,7 @@ export function LoginForm() {
           name="email"
           type="email"
           autoComplete="email"
+          className="h-11"
           placeholder="seu@email.com"
           aria-invalid={Boolean(state?.fieldErrors?.email)}
           disabled={isPending}
@@ -66,6 +67,7 @@ export function LoginForm() {
           name="password"
           type="password"
           autoComplete="current-password"
+          className="h-11"
           placeholder="••••••••"
           aria-invalid={Boolean(state?.fieldErrors?.password)}
           disabled={isPending}
@@ -82,7 +84,11 @@ export function LoginForm() {
         <p className="text-destructive text-sm">{state.error}</p>
       ) : null}
 
-      <Button type="submit" className="h-10 w-full" disabled={isPending}>
+      <Button
+        type="submit"
+        className="h-11 w-full text-base shadow-sm"
+        disabled={isPending}
+      >
         {isPending ? 'Entrando...' : 'Entrar'}
       </Button>
     </form>

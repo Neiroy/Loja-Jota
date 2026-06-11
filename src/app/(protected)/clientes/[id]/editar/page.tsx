@@ -19,16 +19,18 @@ export default async function EditarClientePage({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="page-stack">
       <PageHeader
         title="Editar cliente"
         description={`Atualize os dados de ${customer.name}.`}
       />
-      <CustomerForm
-        mode="edit"
-        customer={customer}
-        cancelHref={`/clientes/${customer.id}`}
-      />
+      <div className="max-w-3xl">
+        <CustomerForm
+          mode="edit"
+          customer={customer}
+          cancelHref={`/clientes/${customer.id}`}
+        />
+      </div>
     </div>
   );
 }

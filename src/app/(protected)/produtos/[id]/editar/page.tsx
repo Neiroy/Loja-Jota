@@ -19,16 +19,18 @@ export default async function EditarProdutoPage({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="page-stack">
       <PageHeader
         title="Editar produto"
         description={`Atualize os dados de ${product.name}.`}
       />
-      <ProductForm
-        mode="edit"
-        product={product}
-        cancelHref={`/produtos/${product.id}`}
-      />
+      <div className="max-w-3xl">
+        <ProductForm
+          mode="edit"
+          product={product}
+          cancelHref={`/produtos/${product.id}`}
+        />
+      </div>
     </div>
   );
 }

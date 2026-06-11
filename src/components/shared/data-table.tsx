@@ -36,7 +36,7 @@ export function DataTable<T>({
       <div
         className={cn(
           surfaceCardClassName,
-          'px-6 py-12 text-center text-sm text-stone-500',
+          'px-6 py-14 text-center text-sm text-stone-500',
           className
         )}
       >
@@ -46,7 +46,9 @@ export function DataTable<T>({
   }
 
   return (
-    <div className={cn(surfaceCardClassName, 'overflow-hidden', className)}>
+    <div
+      className={cn(surfaceCardClassName, 'min-w-0 overflow-hidden', className)}
+    >
       <Table>
         <TableHeader>
           <TableRow className="hover:bg-transparent">

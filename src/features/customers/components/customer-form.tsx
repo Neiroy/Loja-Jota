@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useActionState } from 'react';
+import { useActionState, useState } from 'react';
 
 import {
   createCustomerAction,
@@ -9,6 +9,7 @@ import {
 } from '@/features/customers/actions/customer.actions';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { maskCpf, maskPhone } from '@/lib/masks';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -32,6 +33,8 @@ export function CustomerForm({
       : updateCustomerAction.bind(null, customer!.id);
 
   const [state, formAction, isPending] = useActionState(action, null);
+  const [phone, setPhone] = useState(() => maskPhone(customer?.phone ?? ''));
+  const [cpf, setCpf] = useState(() => maskCpf(customer?.cpf ?? ''));
 
   return (
     <FormSection
@@ -68,8 +71,12 @@ export function CustomerForm({
           <Input
             id="phone"
             name="phone"
-            defaultValue={customer?.phone ?? ''}
-            placeholder="(11) 99999-9999"
+            type="tel"
+            inputMode="tel"
+            autoComplete="tel"
+            value={phone}
+            onChange={(event) => setPhone(maskPhone(event.target.value))}
+            placeholder="(00) 00000-0000"
             aria-invalid={Boolean(state?.fieldErrors?.phone)}
             disabled={isPending}
             required
@@ -86,8 +93,11 @@ export function CustomerForm({
           <Input
             id="cpf"
             name="cpf"
-            defaultValue={customer?.cpf ?? ''}
-            placeholder="Somente números ou com pontuação"
+            inputMode="numeric"
+            autoComplete="off"
+            value={cpf}
+            onChange={(event) => setCpf(maskCpf(event.target.value))}
+            placeholder="000.000.000-00"
             aria-invalid={Boolean(state?.fieldErrors?.cpf)}
             disabled={isPending}
           />
@@ -135,7 +145,7 @@ export function CustomerForm({
           <p className="text-destructive text-sm">{state.error}</p>
         ) : null}
 
-        <div className="flex flex-col gap-2 pt-2 sm:flex-row">
+        <div className="flex flex-col-reverse gap-3 border-t border-stone-200/60 pt-6 sm:flex-row sm:justify-start">
           <Button type="submit" disabled={isPending}>
             {isPending
               ? 'Salvando...'

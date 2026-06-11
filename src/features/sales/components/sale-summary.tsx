@@ -1,5 +1,6 @@
 import { formatProductPrice } from '@/features/products/utils/format-product-price';
-import { FormSection } from '@/components/shared/form-section';
+import { surfaceCardClassName } from '@/lib/surface';
+import { cn } from '@/lib/utils';
 import type { CreateSaleItemInput } from '@/schemas/sale.schema';
 import type { Product } from '@/types/product.types';
 
@@ -26,24 +27,33 @@ export function SaleSummary({ items, products, discount }: SaleSummaryProps) {
   const total = Math.max(subtotal - safeDiscount, 0);
 
   return (
-    <FormSection
-      title="Resumo estimado"
-      description="Valores finais são calculados no servidor no momento do registro."
-    >
-      <div className="space-y-2 text-sm">
+    <aside className={cn(surfaceCardClassName, 'overflow-hidden')}>
+      <div className="border-b border-stone-200/60 bg-stone-50/50 px-6 py-5">
+        <h3 className="text-lg font-semibold text-stone-900">
+          Resumo estimado
+        </h3>
+        <p className="mt-1 text-sm text-stone-500">
+          Valores finais são calculados no servidor.
+        </p>
+      </div>
+      <div className="space-y-3 px-6 py-5 text-sm">
         <div className="flex items-center justify-between text-stone-600">
           <span>Subtotal estimado</span>
-          <span>{formatProductPrice(subtotal)}</span>
+          <span className="font-medium text-stone-900">
+            {formatProductPrice(subtotal)}
+          </span>
         </div>
         <div className="flex items-center justify-between text-stone-600">
           <span>Desconto</span>
-          <span>{formatProductPrice(safeDiscount)}</span>
+          <span className="font-medium text-stone-900">
+            {formatProductPrice(safeDiscount)}
+          </span>
         </div>
-        <div className="flex items-center justify-between border-t border-stone-200/80 pt-2 text-base font-medium text-stone-900">
+        <div className="flex items-center justify-between rounded-xl border border-stone-200/60 bg-stone-50/80 px-4 py-3 text-base font-semibold text-stone-900">
           <span>Total estimado</span>
           <span>{formatProductPrice(total)}</span>
         </div>
       </div>
-    </FormSection>
+    </aside>
   );
 }
