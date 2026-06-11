@@ -274,6 +274,30 @@ Fase 10 concluída.
 
 ---
 
+## Refinamento Visual Premium Global ✅
+
+**Status:** Concluído
+
+Refinamento incremental do visual em 4 etapas, sem alteração de lógica de negócio, banco, RLS ou auth.
+
+### Entregáveis
+
+- [x] **Etapa 1 — Fundação:** tokens `#F7F6F3` em `globals.css`, utilitários `surface.ts`, `.surface-card` / `.surface-muted`
+- [x] **Etapa 2 — Primitivos UI:** Button/Input `h-9`, Table header uppercase, Card, Dialog, Badge, Skeleton refinados
+- [x] **Etapa 3 — Shared:** `FilterPanel`, `DetailField`, migração de filtros e detail cards; `FormSection`, `DataTable`, `EmptyState`, skeletons
+- [x] **Etapa 4 — Layout:** `AppShell`, Sidebar premium, Topbar com `backdrop-blur`, `MobileSidebar`, harmonização de bordas residuais
+- [x] `docs/UI_DESIGN_SYSTEM.md` atualizado com padrão visual final
+
+### Critério de conclusão
+
+Visual quiet luxury operacional consistente em todas as telas; `npm run lint && npm run build && npm run format:check` passando.
+
+### Dependências
+
+Fase 11 concluída.
+
+---
+
 ## Pós-MVP — Deploy e homologação
 
 ### Etapa 1 — Documentação ✅
@@ -306,6 +330,7 @@ Fase 1 (Docs) ✅
                            └→ Fase 9 (Fiado)
                                 └→ Fase 10 (Dashboard)
                                      └→ Fase 11 (Validação)
+                                          └→ Refinamento Visual Premium Global ✅
 ```
 
 ---
