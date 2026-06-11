@@ -171,6 +171,17 @@ Primitives do shadcn/ui: Button, Input, Select, Table, Card, Badge, Dialog, Shee
 - Abas ou seções: Vendas, Fiados em aberto, Fiados pagos
 - `StatusBadge` em cada registro financeiro
 
+### Configurações (`/configuracoes`)
+
+- `PageHeader` com título e subtítulo informativo
+- Grid responsivo `lg:grid-cols-2` com cards brancos (`border-stone-200`, `shadow-sm`)
+- Ícone Lucide discreto no título de cada seção (`stone-100` / `stone-600`)
+- Campos somente leitura em grid `sm:grid-cols-2` (padrão `SettingsDetailField`)
+- `StatusBadge` para status operacionais (Ativo)
+- Chips neutros para módulos ativos
+- Sem formulários, botões de salvar ou campos editáveis
+- Dados do usuário logado (nome, e-mail, role) via server; demais conteúdo estático
+
 ---
 
 ## Menu lateral (Sidebar)

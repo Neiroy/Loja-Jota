@@ -1,17 +1,17 @@
 import { PageHeader } from '@/components/layout/page-header';
-import { EmptyState } from '@/components/shared/empty-state';
+import { getSettingsOverview } from '@/features/settings/actions/settings.actions';
+import { SettingsOverview } from '@/features/settings/components/settings-overview';
 
-export default function ConfiguracoesPage() {
+export default async function ConfiguracoesPage() {
+  const overview = await getSettingsOverview();
+
   return (
     <div className="space-y-6">
       <PageHeader
         title="Configurações"
-        description="Preferências do sistema interno."
+        description="Preferências e informações do sistema interno da loja."
       />
-      <EmptyState
-        title="Configurações em breve"
-        description="Esta área ficará disponível em uma versão futura do sistema interno da loja."
-      />
+      <SettingsOverview overview={overview} />
     </div>
   );
 }
