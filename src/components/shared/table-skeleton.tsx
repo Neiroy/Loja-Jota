@@ -1,20 +1,32 @@
 import { Skeleton } from '@/components/ui/skeleton';
+import { surfaceCardClassName, surfaceMutedClassName } from '@/lib/surface';
+import { cn } from '@/lib/utils';
 
 type TableSkeletonProps = {
   rows?: number;
   columns?: number;
+  className?: string;
 };
 
-export function TableSkeleton({ rows = 5, columns = 4 }: TableSkeletonProps) {
+export function TableSkeleton({
+  rows = 5,
+  columns = 4,
+  className,
+}: TableSkeletonProps) {
   return (
-    <div className="overflow-hidden rounded-xl border border-stone-200 bg-white shadow-sm">
-      <div className="border-b border-stone-100 px-4 py-3">
+    <div className={cn(surfaceCardClassName, 'overflow-hidden', className)}>
+      <div
+        className={cn(
+          surfaceMutedClassName,
+          'border-b border-stone-200/80 px-4 py-3.5'
+        )}
+      >
         <div
           className="grid gap-4"
           style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}
         >
           {Array.from({ length: columns }).map((_, index) => (
-            <Skeleton key={`header-${index}`} className="h-4 w-20" />
+            <Skeleton key={`header-${index}`} className="h-3.5 w-20" />
           ))}
         </div>
       </div>

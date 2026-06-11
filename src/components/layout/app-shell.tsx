@@ -9,10 +9,10 @@ export function AppShell({ children }: AppShellProps) {
   return (
     <div className="bg-background flex min-h-screen">
       <Sidebar />
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-h-screen min-w-0 flex-1 flex-col">
         <Topbar />
-        <main className="flex-1 overflow-auto">
-          <div className="mx-auto max-w-7xl p-6 lg:p-8">{children}</div>
+        <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
+          <div className="mx-auto w-full max-w-7xl p-6 lg:p-8">{children}</div>
         </main>
       </div>
     </div>

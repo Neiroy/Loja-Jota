@@ -59,7 +59,7 @@ export function SaleLineItemsEditor({
       {items.map((item, index) => (
         <div
           key={`sale-item-${index}`}
-          className="grid gap-3 rounded-lg border border-stone-200 p-4 sm:grid-cols-[1fr_120px_auto]"
+          className="grid gap-3 rounded-lg border border-stone-200/80 p-4 sm:grid-cols-[1fr_120px_auto]"
         >
           <div className="space-y-2">
             <Label htmlFor={`product_id_${index}`}>Produto *</Label>

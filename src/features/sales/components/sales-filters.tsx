@@ -3,10 +3,12 @@
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useState, useTransition } from 'react';
 
+import { FilterPanel } from '@/components/shared/filter-panel';
 import { PAYMENT_METHOD_LABELS } from '@/features/sales/utils/payment-method-labels';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { fieldControlClassName } from '@/lib/surface';
 import type { PaymentMethod } from '@/schemas/sale.schema';
 import type { SalePaymentStatusFilter } from '@/schemas/sale.schema';
 
@@ -129,10 +131,7 @@ export function SalesFilters({
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="flex flex-col gap-3 rounded-xl border border-stone-200 bg-white p-4 shadow-sm sm:flex-row sm:items-end"
-    >
+    <FilterPanel onSubmit={handleSubmit}>
       <div className="flex-1 space-y-2">
         <Label htmlFor="search">Buscar cliente</Label>
         <Input
@@ -155,7 +154,7 @@ export function SalesFilters({
             setPaymentMethodValue(event.target.value as PaymentMethod | 'all')
           }
           disabled={isPending}
-          className="border-input focus-visible:border-ring focus-visible:ring-ring/50 h-8 w-full rounded-lg border bg-transparent px-2.5 text-sm outline-none focus-visible:ring-3 disabled:opacity-50"
+          className={fieldControlClassName}
         >
           {PAYMENT_FILTER_OPTIONS.map((option) => (
             <option key={option.value} value={option.value}>
@@ -175,7 +174,7 @@ export function SalesFilters({
             setPaymentStatusValue(event.target.value as SalePaymentStatusFilter)
           }
           disabled={isPending}
-          className="border-input focus-visible:border-ring focus-visible:ring-ring/50 h-8 w-full rounded-lg border bg-transparent px-2.5 text-sm outline-none focus-visible:ring-3 disabled:opacity-50"
+          className={fieldControlClassName}
         >
           {STATUS_FILTER_OPTIONS.map((option) => (
             <option key={option.value} value={option.value}>
@@ -198,6 +197,6 @@ export function SalesFilters({
           Limpar
         </Button>
       </div>
-    </form>
+    </FilterPanel>
   );
 }

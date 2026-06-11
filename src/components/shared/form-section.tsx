@@ -1,3 +1,4 @@
+import { surfaceCardClassName } from '@/lib/surface';
 import { cn } from '@/lib/utils';
 
 type FormSectionProps = {
@@ -14,14 +15,9 @@ export function FormSection({
   className,
 }: FormSectionProps) {
   return (
-    <section
-      className={cn(
-        'space-y-4 rounded-xl border border-stone-200 bg-white p-6 shadow-sm',
-        className
-      )}
-    >
+    <section className={cn(surfaceCardClassName, 'space-y-5 p-6', className)}>
       <div className="space-y-1">
-        <h2 className="text-lg font-medium text-stone-800">{title}</h2>
+        <h2 className="text-lg font-semibold text-stone-900">{title}</h2>
         {description ? (
           <p className="text-sm text-stone-500">{description}</p>
         ) : null}

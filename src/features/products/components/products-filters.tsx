@@ -3,9 +3,11 @@
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useState, useTransition } from 'react';
 
+import { FilterPanel } from '@/components/shared/filter-panel';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { fieldControlClassName } from '@/lib/surface';
 import type { ProductStatusFilter } from '@/schemas/product.schema';
 
 type ProductsFiltersProps = {
@@ -86,10 +88,7 @@ export function ProductsFilters({ search, status }: ProductsFiltersProps) {
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="flex flex-col gap-3 rounded-xl border border-stone-200 bg-white p-4 shadow-sm sm:flex-row sm:items-end"
-    >
+    <FilterPanel onSubmit={handleSubmit}>
       <div className="flex-1 space-y-2">
         <Label htmlFor="search">Buscar</Label>
         <Input
@@ -112,7 +111,7 @@ export function ProductsFilters({ search, status }: ProductsFiltersProps) {
             setStatusValue(event.target.value as ProductStatusFilter)
           }
           disabled={isPending}
-          className="border-input focus-visible:border-ring focus-visible:ring-ring/50 h-8 w-full rounded-lg border bg-transparent px-2.5 text-sm outline-none focus-visible:ring-3 disabled:opacity-50"
+          className={fieldControlClassName}
         >
           {STATUS_OPTIONS.map((option) => (
             <option key={option.value} value={option.value}>
@@ -135,6 +134,6 @@ export function ProductsFilters({ search, status }: ProductsFiltersProps) {
           Limpar
         </Button>
       </div>
-    </form>
+    </FilterPanel>
   );
 }

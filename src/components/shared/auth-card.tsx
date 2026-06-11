@@ -14,18 +14,18 @@ type AuthCardProps = {
 
 export function AuthCard({ title, description, children }: AuthCardProps) {
   return (
-    <Card className="border-stone-200 bg-white shadow-sm">
-      <CardHeader className="space-y-2 text-center">
-        <CardTitle className="text-2xl font-semibold tracking-tight text-stone-900">
+    <Card className="w-full max-w-md">
+      <CardHeader className="space-y-2 px-8 pt-8 text-center">
+        <CardTitle className="text-2xl font-semibold tracking-tight">
           {title}
         </CardTitle>
         {description ? (
-          <CardDescription className="text-muted-foreground">
+          <CardDescription className="text-stone-500">
             {description}
           </CardDescription>
         ) : null}
       </CardHeader>
-      <CardContent className="space-y-6">{children}</CardContent>
+      <CardContent className="space-y-6 px-8 pb-8">{children}</CardContent>
     </Card>
   );
 }

@@ -19,7 +19,7 @@ export function DashboardSection({
   return (
     <section className="space-y-4">
       <div className="flex items-center justify-between gap-4">
-        <h2 className="text-lg font-medium text-stone-800">{title}</h2>
+        <h2 className="text-lg font-semibold text-stone-900">{title}</h2>
         {href ? (
           <Link
             href={href}

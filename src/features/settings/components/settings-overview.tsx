@@ -11,6 +11,7 @@ import {
 import { StatusBadge } from '@/components/shared/status-badge';
 import { SettingsDetailField } from '@/features/settings/components/settings-detail-field';
 import { SettingsModuleBadges } from '@/features/settings/components/settings-module-badges';
+import { surfaceCardClassName } from '@/lib/surface';
 import { cn } from '@/lib/utils';
 import type { SettingsOverview } from '@/types/settings.types';
 
@@ -32,14 +33,10 @@ function SettingsSection({
   children,
 }: SettingsSectionProps) {
   return (
-    <section
-      className={cn(
-        'space-y-4 rounded-xl border border-stone-200 bg-white p-6 shadow-sm'
-      )}
-    >
+    <section className={cn(surfaceCardClassName, 'space-y-5 p-6')}>
       <div className="space-y-1">
-        <h2 className="flex items-center gap-2 text-lg font-medium text-stone-800">
-          <span className="rounded-lg bg-stone-100 p-2 text-stone-600">
+        <h2 className="flex items-center gap-2 text-lg font-semibold text-stone-900">
+          <span className="rounded-lg bg-stone-100/80 p-2 text-stone-600">
             <Icon className="size-4" />
           </span>
           {title}

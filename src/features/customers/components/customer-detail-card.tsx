@@ -1,3 +1,4 @@
+import { DetailField } from '@/components/shared/detail-field';
 import { FormSection } from '@/components/shared/form-section';
 import { CustomerStatusBadge } from '@/features/customers/components/customer-status-badge';
 import type { Customer } from '@/types/customer.types';
@@ -19,22 +20,6 @@ function formatDateTime(value: string) {
     dateStyle: 'short',
     timeStyle: 'short',
   }).format(new Date(value));
-}
-
-type DetailFieldProps = {
-  label: string;
-  value: React.ReactNode;
-};
-
-function DetailField({ label, value }: DetailFieldProps) {
-  return (
-    <div className="space-y-1">
-      <p className="text-xs font-medium tracking-wide text-stone-500 uppercase">
-        {label}
-      </p>
-      <p className="text-sm text-stone-900">{value}</p>
-    </div>
-  );
 }
 
 type CustomerDetailCardProps = {

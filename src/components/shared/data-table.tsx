@@ -6,6 +6,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { surfaceCardClassName } from '@/lib/surface';
 import { cn } from '@/lib/utils';
 
 export type DataTableColumn<T> = {
@@ -34,7 +35,8 @@ export function DataTable<T>({
     return (
       <div
         className={cn(
-          'rounded-xl border border-stone-200 bg-white px-6 py-10 text-center text-sm text-stone-500 shadow-sm',
+          surfaceCardClassName,
+          'px-6 py-12 text-center text-sm text-stone-500',
           className
         )}
       >
@@ -44,20 +46,12 @@ export function DataTable<T>({
   }
 
   return (
-    <div
-      className={cn(
-        'overflow-hidden rounded-xl border border-stone-200 bg-white shadow-sm',
-        className
-      )}
-    >
+    <div className={cn(surfaceCardClassName, 'overflow-hidden', className)}>
       <Table>
-        <TableHeader className="bg-stone-50/80">
+        <TableHeader>
           <TableRow className="hover:bg-transparent">
             {columns.map((column) => (
-              <TableHead
-                key={column.key}
-                className={cn('text-stone-600', column.className)}
-              >
+              <TableHead key={column.key} className={column.className}>
                 {column.header}
               </TableHead>
             ))}

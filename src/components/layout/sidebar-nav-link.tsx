@@ -40,13 +40,13 @@ export function SidebarNavLink({ item, onNavigate }: SidebarNavLinkProps) {
       href={item.href}
       onClick={onNavigate}
       className={cn(
-        'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+        'flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
         isActive
-          ? 'border-l-2 border-stone-900 bg-stone-100 pl-[10px] text-stone-900'
-          : 'text-stone-600 hover:bg-stone-50 hover:text-stone-900'
+          ? 'border-l-2 border-stone-900 bg-stone-100/80 pl-[10px] text-stone-900'
+          : 'text-stone-500 hover:bg-stone-50/80 hover:text-stone-900'
       )}
     >
-      <Icon className="size-4 shrink-0" />
+      <Icon className="size-4 shrink-0 opacity-80" />
       <span>{item.label}</span>
     </Link>
   );

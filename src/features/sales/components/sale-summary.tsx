@@ -39,7 +39,7 @@ export function SaleSummary({ items, products, discount }: SaleSummaryProps) {
           <span>Desconto</span>
           <span>{formatProductPrice(safeDiscount)}</span>
         </div>
-        <div className="flex items-center justify-between border-t border-stone-200 pt-2 text-base font-medium text-stone-900">
+        <div className="flex items-center justify-between border-t border-stone-200/80 pt-2 text-base font-medium text-stone-900">
           <span>Total estimado</span>
           <span>{formatProductPrice(total)}</span>
         </div>

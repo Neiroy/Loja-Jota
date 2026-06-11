@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 
+import { DetailField } from '@/components/shared/detail-field';
 import { FormSection } from '@/components/shared/form-section';
 import { MarkReceivablePaidDialog } from '@/features/receivables/components/mark-receivable-paid-dialog';
 import { ReceivableStatusBadge } from '@/features/receivables/components/receivable-status-badge';
@@ -16,22 +17,6 @@ import { formatProductPrice } from '@/features/products/utils/format-product-pri
 import { Button, buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { ReceivableDetail } from '@/types/receivable.types';
-
-type DetailFieldProps = {
-  label: string;
-  value: React.ReactNode;
-};
-
-function DetailField({ label, value }: DetailFieldProps) {
-  return (
-    <div className="space-y-1">
-      <p className="text-xs font-medium tracking-wide text-stone-500 uppercase">
-        {label}
-      </p>
-      <div className="text-sm text-stone-900">{value}</div>
-    </div>
-  );
-}
 
 type ReceivableDetailCardProps = {
   receivable: ReceivableDetail;
@@ -120,7 +105,7 @@ export function ReceivableDetailCard({
         </div>
 
         {canSettle ? (
-          <div className="mt-6 border-t border-stone-100 pt-4">
+          <div className="mt-6 border-t border-stone-200/80 pt-5">
             <Button type="button" onClick={() => setDialogOpen(true)}>
               Quitar fiado
             </Button>

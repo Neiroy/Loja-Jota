@@ -1,5 +1,6 @@
 import Link from 'next/link';
 
+import { DetailField } from '@/components/shared/detail-field';
 import { FormSection } from '@/components/shared/form-section';
 import { PaymentMethodBadge } from '@/features/sales/components/payment-method-badge';
 import { SalePaymentStatusBadge } from '@/features/sales/components/sale-payment-status-badge';
@@ -8,22 +9,6 @@ import { formatProductPrice } from '@/features/products/utils/format-product-pri
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { SaleDetail } from '@/types/sale.types';
-
-type DetailFieldProps = {
-  label: string;
-  value: React.ReactNode;
-};
-
-function DetailField({ label, value }: DetailFieldProps) {
-  return (
-    <div className="space-y-1">
-      <p className="text-xs font-medium tracking-wide text-stone-500 uppercase">
-        {label}
-      </p>
-      <div className="text-sm text-stone-900">{value}</div>
-    </div>
-  );
-}
 
 type SaleDetailCardProps = {
   sale: SaleDetail;

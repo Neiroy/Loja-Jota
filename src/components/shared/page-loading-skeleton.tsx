@@ -1,5 +1,7 @@
-import { Skeleton } from '@/components/ui/skeleton';
 import { TableSkeleton } from '@/components/shared/table-skeleton';
+import { Skeleton } from '@/components/ui/skeleton';
+import { surfaceCardClassName } from '@/lib/surface';
+import { cn } from '@/lib/utils';
 
 export function PageLoadingSkeleton() {
   return (
@@ -8,8 +10,8 @@ export function PageLoadingSkeleton() {
         <Skeleton className="h-8 w-48" />
         <Skeleton className="h-4 w-72 max-w-full" />
       </div>
-      <div className="rounded-xl border border-stone-200 bg-white p-4 shadow-sm">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+      <div className={cn(surfaceCardClassName, 'p-5')}>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
           <Skeleton className="h-9 flex-1" />
           <Skeleton className="h-9 w-44" />
           <Skeleton className="h-9 w-24" />

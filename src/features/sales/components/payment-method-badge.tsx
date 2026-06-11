@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 import type { PaymentMethod } from '@/schemas/sale.schema';
 
 const paymentStyles: Record<PaymentMethod, string> = {
-  cash: 'border-stone-200 bg-stone-100 text-stone-700',
+  cash: 'border-stone-200/80 bg-stone-100 text-stone-700',
   pix: 'border-sky-200 bg-sky-50 text-sky-700',
   card: 'border-indigo-200 bg-indigo-50 text-indigo-700',
   credit_30_days: 'border-amber-200 bg-amber-50 text-amber-700',

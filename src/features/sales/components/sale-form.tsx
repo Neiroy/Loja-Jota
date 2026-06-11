@@ -125,7 +125,7 @@ export function SaleForm({ customers, products }: SaleFormProps) {
             {PAYMENT_OPTIONS.map((method) => (
               <label
                 key={method}
-                className="flex cursor-pointer items-center gap-2 rounded-lg border border-stone-200 px-3 py-2 text-sm"
+                className="flex cursor-pointer items-center gap-2 rounded-lg border border-stone-200/80 px-3 py-2 text-sm"
               >
                 <input
                   type="radio"

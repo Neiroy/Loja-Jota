@@ -4,7 +4,7 @@ import type { SalePaymentStatus } from '@/types/sale.types';
 const statusStyles: Record<SalePaymentStatus, string> = {
   paid: 'border-emerald-200 bg-emerald-50 text-emerald-700',
   pending: 'border-amber-200 bg-amber-50 text-amber-700',
-  cancelled: 'border-stone-200 bg-stone-100 text-stone-600',
+  cancelled: 'border-stone-200/80 bg-stone-100 text-stone-600',
 };
 
 const statusLabels: Record<SalePaymentStatus, string> = {
