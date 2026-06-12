@@ -1,6 +1,7 @@
 import type { LucideIcon } from 'lucide-react';
 import {
   Building2,
+  ImageIcon,
   Info,
   LayoutGrid,
   Shield,
@@ -13,6 +14,7 @@ import Link from 'next/link';
 import { StatusBadge } from '@/components/shared/status-badge';
 import { SettingsDetailField } from '@/features/settings/components/settings-detail-field';
 import { SettingsModuleBadges } from '@/features/settings/components/settings-module-badges';
+import { StoreLogoCard } from '@/features/settings/components/store-logo-card';
 import { buttonVariants } from '@/components/ui/button';
 import { surfaceCardClassName } from '@/lib/surface';
 import { cn } from '@/lib/utils';
@@ -78,6 +80,18 @@ export function SettingsOverview({ overview }: SettingsOverviewProps) {
             value={overview.store.environment}
           />
         </div>
+      </SettingsSection>
+
+      <SettingsSection
+        title="Logo da loja"
+        description="Personalize a identidade visual exibida no painel."
+        icon={ImageIcon}
+      >
+        <StoreLogoCard
+          storeName={overview.store.name}
+          storeMonogram={overview.store.monogram}
+          initialLogoUrl={overview.store.logoUrl}
+        />
       </SettingsSection>
 
       <SettingsSection

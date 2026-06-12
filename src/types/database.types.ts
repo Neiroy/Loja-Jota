@@ -20,6 +20,7 @@ export type Store = {
   id: string;
   name: string;
   slug: string | null;
+  logo_path: string | null;
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -166,7 +167,9 @@ export type Database = {
         Row: Store;
         Insert: Pick<Store, 'name'> &
           Partial<Pick<Store, 'slug' | 'is_active'>>;
-        Update: Partial<Pick<Store, 'name' | 'slug' | 'is_active'>>;
+        Update: Partial<
+          Pick<Store, 'name' | 'slug' | 'is_active' | 'logo_path'>
+        >;
       };
       profiles: {
         Row: Profile;

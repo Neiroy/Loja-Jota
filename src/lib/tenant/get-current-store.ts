@@ -3,6 +3,7 @@ import { cache } from 'react';
 import * as authRepository from '@/repositories/auth.repository';
 import * as profilesRepository from '@/repositories/profiles.repository';
 import * as storesRepository from '@/repositories/stores.repository';
+import { getStoreLogoPublicUrl } from '@/lib/storage/store-logos';
 import type { Profile } from '@/types/profile.types';
 
 import { StoreContextError } from './store-errors';
@@ -29,6 +30,13 @@ export type StoreContext = {
   storeId: string;
   userId: string;
   profile: Profile;
+};
+
+export type StoreBranding = {
+  storeName: string;
+  storeMonogram: string;
+  logoPath: string | null;
+  logoUrl: string | null;
 };
 
 export const getCurrentStoreId = cache(async (): Promise<string> => {
@@ -88,3 +96,38 @@ export const getCurrentStoreDisplayName = cache(async (): Promise<string> => {
     return DEFAULT_STORE_DISPLAY_NAME;
   }
 });
+
+export const getCurrentStoreBranding = cache(
+  async (): Promise<StoreBranding> => {
+    const storeName = await getCurrentStoreDisplayName();
+    const storeMonogram = getStoreMonogram(storeName);
+
+    try {
+      const storeId = await getCurrentStoreId();
+      const { data: store, error } = await storesRepository.findById(storeId);
+
+      if (error || !store?.logo_path) {
+        return {
+          storeName,
+          storeMonogram,
+          logoPath: null,
+          logoUrl: null,
+        };
+      }
+
+      return {
+        storeName,
+        storeMonogram,
+        logoPath: store.logo_path,
+        logoUrl: getStoreLogoPublicUrl(store.logo_path),
+      };
+    } catch {
+      return {
+        storeName,
+        storeMonogram,
+        logoPath: null,
+        logoUrl: null,
+      };
+    }
+  }
+);

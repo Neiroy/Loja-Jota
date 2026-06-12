@@ -14,11 +14,18 @@ import type { Product } from '@/types/product.types';
 export class ProductServiceError extends Error {
   constructor(
     message: string,
-    public readonly code: 'NOT_FOUND' | 'INVALID_ID' | 'DATABASE'
+    public readonly code: 'NOT_FOUND' | 'INVALID_ID' | 'HAS_LINKS' | 'DATABASE'
   ) {
     super(message);
     this.name = 'ProductServiceError';
   }
+}
+
+const PRODUCT_HAS_LINKS_MESSAGE =
+  'Este produto possui vendas vinculadas. Use a opção Inativar produto.';
+
+function isForeignKeyError(error: { code?: string }) {
+  return error.code === '23503';
 }
 
 function normalizeCreateInput(input: CreateProductInput) {
@@ -206,4 +213,44 @@ export async function setStatus(
   }
 
   return normalizeProduct(data);
+}
+
+export async function remove(id: string): Promise<void> {
+  const parsedId = productIdSchema.safeParse(id);
+
+  if (!parsedId.success) {
+    throw new ProductServiceError('Identificador inválido.', 'INVALID_ID');
+  }
+
+  await getById(parsedId.data);
+
+  const storeId = await getCurrentStoreId();
+  const { hasLinks, error: linksError } = await productsRepository.hasSaleLinks(
+    storeId,
+    parsedId.data
+  );
+
+  if (linksError) {
+    throw new ProductServiceError(
+      'Não foi possível verificar o histórico do produto.',
+      'DATABASE'
+    );
+  }
+
+  if (hasLinks) {
+    throw new ProductServiceError(PRODUCT_HAS_LINKS_MESSAGE, 'HAS_LINKS');
+  }
+
+  const { error } = await productsRepository.deleteById(storeId, parsedId.data);
+
+  if (error) {
+    if (isForeignKeyError(error)) {
+      throw new ProductServiceError(PRODUCT_HAS_LINKS_MESSAGE, 'HAS_LINKS');
+    }
+
+    throw new ProductServiceError(
+      'Não foi possível excluir o produto.',
+      'DATABASE'
+    );
+  }
 }

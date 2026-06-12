@@ -5,6 +5,7 @@ import { PageHeader } from '@/components/layout/page-header';
 import { getCustomer } from '@/features/customers/actions/customer.actions';
 import { CustomerDetailCard } from '@/features/customers/components/customer-detail-card';
 import { CustomerFinancialPlaceholder } from '@/features/customers/components/customer-financial-placeholder';
+import { DeleteCustomerButton } from '@/features/customers/components/delete-customer-button';
 import { ToggleCustomerStatusButton } from '@/features/customers/components/toggle-customer-status-button';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -29,7 +30,7 @@ export default async function ClienteDetalhePage({
         title={customer.name}
         description="Detalhes do cliente e histórico financeiro."
         action={
-          <div className="flex flex-col gap-2 sm:flex-row">
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
             <Link
               href={`/clientes/${customer.id}/editar`}
               className={cn(buttonVariants({ variant: 'outline' }))}
@@ -39,6 +40,10 @@ export default async function ClienteDetalhePage({
             <ToggleCustomerStatusButton
               customerId={customer.id}
               isActive={customer.is_active}
+              customerName={customer.name}
+            />
+            <DeleteCustomerButton
+              customerId={customer.id}
               customerName={customer.name}
             />
           </div>

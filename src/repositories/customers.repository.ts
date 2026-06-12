@@ -85,3 +85,46 @@ export async function update(
     .select('*')
     .single<Customer>();
 }
+
+export async function hasFinancialLinks(storeId: string, customerId: string) {
+  const supabase = await createClient();
+
+  const [salesResult, receivablesResult] = await Promise.all([
+    supabase
+      .from('sales')
+      .select('id', { count: 'exact', head: true })
+      .eq('store_id', storeId)
+      .eq('customer_id', customerId),
+    supabase
+      .from('receivables')
+      .select('id', { count: 'exact', head: true })
+      .eq('store_id', storeId)
+      .eq('customer_id', customerId),
+  ]);
+
+  if (salesResult.error) {
+    return { hasLinks: false, error: salesResult.error };
+  }
+
+  if (receivablesResult.error) {
+    return { hasLinks: false, error: receivablesResult.error };
+  }
+
+  const salesCount = salesResult.count ?? 0;
+  const receivablesCount = receivablesResult.count ?? 0;
+
+  return {
+    hasLinks: salesCount > 0 || receivablesCount > 0,
+    error: null,
+  };
+}
+
+export async function deleteById(storeId: string, id: string) {
+  const supabase = await createClient();
+
+  return supabase
+    .from('customers')
+    .delete()
+    .eq('id', id)
+    .eq('store_id', storeId);
+}

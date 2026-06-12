@@ -4,6 +4,7 @@ import { MenuIcon } from 'lucide-react';
 import { useState } from 'react';
 
 import { SidebarNavLink } from '@/components/layout/sidebar-nav-link';
+import { StoreBrandMark } from '@/components/layout/store-brand-mark';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -17,11 +18,13 @@ import { NAV_ITEMS } from '@/lib/constants/navigation';
 type MobileSidebarProps = {
   storeName: string;
   storeMonogram: string;
+  logoUrl?: string | null;
 };
 
 export function MobileSidebar({
   storeName,
   storeMonogram,
+  logoUrl,
 }: MobileSidebarProps) {
   const [open, setOpen] = useState(false);
 
@@ -42,17 +45,17 @@ export function MobileSidebar({
       <SheetContent side="left" className="w-[min(18rem,88vw)] gap-0 p-0">
         <SheetHeader className="space-y-0 border-b border-stone-200/60 px-5 py-5 text-left">
           <div className="flex items-center gap-3.5">
-            <div
-              aria-hidden
-              className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-stone-900 text-xs font-semibold tracking-wide text-white shadow-[0_2px_8px_rgba(28,25,23,0.2)]"
-            >
-              {storeMonogram}
-            </div>
+            <StoreBrandMark
+              storeName={storeName}
+              storeMonogram={storeMonogram}
+              logoUrl={logoUrl}
+              size="sidebar"
+            />
             <div className="min-w-0">
-              <SheetTitle className="truncate text-sm font-semibold tracking-tight text-stone-900">
+              <SheetTitle className="truncate text-base font-semibold tracking-tight text-stone-950">
                 {storeName}
               </SheetTitle>
-              <p className="truncate text-[11px] font-normal text-stone-500">
+              <p className="truncate text-[13px] leading-tight font-normal text-stone-500">
                 Controle interno
               </p>
             </div>

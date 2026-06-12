@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 
 import { PageHeader } from '@/components/layout/page-header';
 import { getProduct } from '@/features/products/actions/product.actions';
+import { DeleteProductButton } from '@/features/products/components/delete-product-button';
 import { ProductDetailCard } from '@/features/products/components/product-detail-card';
 import { ToggleProductStatusButton } from '@/features/products/components/toggle-product-status-button';
 import { buttonVariants } from '@/components/ui/button';
@@ -28,7 +29,7 @@ export default async function ProdutoDetalhePage({
         title={product.name}
         description="Detalhes do produto e controle de estoque."
         action={
-          <div className="flex flex-col gap-2 sm:flex-row">
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
             <Link
               href={`/produtos/${product.id}/editar`}
               className={cn(buttonVariants({ variant: 'outline' }))}
@@ -38,6 +39,10 @@ export default async function ProdutoDetalhePage({
             <ToggleProductStatusButton
               productId={product.id}
               isActive={product.is_active}
+              productName={product.name}
+            />
+            <DeleteProductButton
+              productId={product.id}
               productName={product.name}
             />
           </div>

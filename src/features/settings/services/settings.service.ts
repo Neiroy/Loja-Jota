@@ -1,6 +1,6 @@
 import { formatProfileRole } from '@/features/settings/utils/format-profile-role';
 import { getEnvironmentLabel } from '@/features/settings/utils/get-environment-label';
-import { getCurrentStoreDisplayName } from '@/lib/tenant/get-current-store';
+import { getCurrentStoreBranding } from '@/lib/tenant/get-current-store';
 import { canManageStores } from '@/lib/tenant/require-store-provisioner';
 import * as authRepository from '@/repositories/auth.repository';
 import * as profilesRepository from '@/repositories/profiles.repository';
@@ -35,15 +35,17 @@ function resolveFullName(
 }
 
 function buildOverview(
-  storeName: string,
+  branding: Awaited<ReturnType<typeof getCurrentStoreBranding>>,
   account: SettingsOverview['account']
 ): SettingsOverview {
   return {
     store: {
-      name: storeName,
+      name: branding.storeName,
       type: 'Sistema interno',
       status: 'Ativo',
       environment: getEnvironmentLabel(),
+      monogram: branding.storeMonogram,
+      logoUrl: branding.logoUrl,
     },
     account,
     preferences: {
@@ -68,7 +70,7 @@ function buildOverview(
 }
 
 export async function getOverview(): Promise<SettingsOverview> {
-  const storeName = await getCurrentStoreDisplayName();
+  const branding = await getCurrentStoreBranding();
 
   const { user } = await authRepository.getUser();
 
@@ -93,7 +95,7 @@ export async function getOverview(): Promise<SettingsOverview> {
 
   manageStores = await canManageStores();
 
-  return buildOverview(storeName, {
+  return buildOverview(branding, {
     fullName,
     email,
     roleLabel,

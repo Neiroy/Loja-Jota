@@ -10,6 +10,8 @@ const FALLBACK_OVERVIEW: SettingsOverview = {
     type: 'Sistema interno',
     status: 'Ativo',
     environment: 'Desenvolvimento',
+    monogram: 'L',
+    logoUrl: null,
   },
   account: {
     fullName: 'Usuário',

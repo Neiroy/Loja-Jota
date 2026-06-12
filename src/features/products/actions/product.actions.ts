@@ -158,3 +158,23 @@ export async function setProductStatusAction(
     return handleServiceError(error);
   }
 }
+
+export async function deleteProductAction(
+  id: string
+): Promise<ActionResult<void>> {
+  const parsedId = productIdSchema.safeParse(id);
+
+  if (!parsedId.success) {
+    return { success: false, error: 'Identificador inválido.' };
+  }
+
+  try {
+    await productsService.remove(parsedId.data);
+
+    revalidatePath('/produtos');
+
+    return { success: true };
+  } catch (error) {
+    return handleServiceError(error);
+  }
+}

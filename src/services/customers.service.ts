@@ -18,6 +18,7 @@ export class CustomerServiceError extends Error {
       | 'NOT_FOUND'
       | 'DUPLICATE_CPF'
       | 'INVALID_ID'
+      | 'HAS_LINKS'
       | 'DATABASE'
   ) {
     super(message);
@@ -33,6 +34,13 @@ function isDuplicateCpfError(error: { code?: string; message?: string }) {
       error.message?.includes('customers_cpf'))
   );
 }
+
+function isForeignKeyError(error: { code?: string }) {
+  return error.code === '23503';
+}
+
+const CUSTOMER_HAS_LINKS_MESSAGE =
+  'Este cliente possui histórico financeiro. Use a opção Inativar cliente.';
 
 function normalizeCreateInput(input: CreateCustomerInput) {
   return {
@@ -221,4 +229,45 @@ export async function setStatus(
   }
 
   return data;
+}
+
+export async function remove(id: string): Promise<void> {
+  const parsedId = customerIdSchema.safeParse(id);
+
+  if (!parsedId.success) {
+    throw new CustomerServiceError('Identificador inválido.', 'INVALID_ID');
+  }
+
+  await getById(parsedId.data);
+
+  const storeId = await getCurrentStoreId();
+  const { hasLinks, error: linksError } =
+    await customersRepository.hasFinancialLinks(storeId, parsedId.data);
+
+  if (linksError) {
+    throw new CustomerServiceError(
+      'Não foi possível verificar o histórico do cliente.',
+      'DATABASE'
+    );
+  }
+
+  if (hasLinks) {
+    throw new CustomerServiceError(CUSTOMER_HAS_LINKS_MESSAGE, 'HAS_LINKS');
+  }
+
+  const { error } = await customersRepository.deleteById(
+    storeId,
+    parsedId.data
+  );
+
+  if (error) {
+    if (isForeignKeyError(error)) {
+      throw new CustomerServiceError(CUSTOMER_HAS_LINKS_MESSAGE, 'HAS_LINKS');
+    }
+
+    throw new CustomerServiceError(
+      'Não foi possível excluir o cliente.',
+      'DATABASE'
+    );
+  }
 }

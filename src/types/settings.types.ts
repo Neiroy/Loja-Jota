@@ -11,6 +11,8 @@ export type SettingsOverview = {
     type: string;
     status: string;
     environment: SettingsEnvironmentLabel;
+    monogram: string;
+    logoUrl: string | null;
   };
   account: {
     fullName: string;

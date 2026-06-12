@@ -156,3 +156,23 @@ export async function setCustomerStatusAction(
     return handleServiceError(error);
   }
 }
+
+export async function deleteCustomerAction(
+  id: string
+): Promise<ActionResult<void>> {
+  const parsedId = customerIdSchema.safeParse(id);
+
+  if (!parsedId.success) {
+    return { success: false, error: 'Identificador inválido.' };
+  }
+
+  try {
+    await customersService.remove(parsedId.data);
+
+    revalidatePath('/clientes');
+
+    return { success: true };
+  } catch (error) {
+    return handleServiceError(error);
+  }
+}

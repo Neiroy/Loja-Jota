@@ -79,3 +79,32 @@ export async function update(storeId: string, id: string, data: ProductUpdate) {
     .select('*')
     .single<Product>();
 }
+
+export async function hasSaleLinks(storeId: string, productId: string) {
+  const supabase = await createClient();
+
+  const { count, error } = await supabase
+    .from('sale_items')
+    .select('id', { count: 'exact', head: true })
+    .eq('store_id', storeId)
+    .eq('product_id', productId);
+
+  if (error) {
+    return { hasLinks: false, error };
+  }
+
+  return {
+    hasLinks: (count ?? 0) > 0,
+    error: null,
+  };
+}
+
+export async function deleteById(storeId: string, id: string) {
+  const supabase = await createClient();
+
+  return supabase
+    .from('products')
+    .delete()
+    .eq('id', id)
+    .eq('store_id', storeId);
+}
