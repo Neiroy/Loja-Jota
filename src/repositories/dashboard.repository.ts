@@ -44,6 +44,7 @@ function unwrapRelation<T>(value: T | T[] | null | undefined): T | null {
 }
 
 export async function findSalesTotalsBetweenDates(
+  storeId: string,
   startDate: string,
   endDate: string
 ) {
@@ -52,43 +53,48 @@ export async function findSalesTotalsBetweenDates(
   return supabase
     .from('sales')
     .select('total')
+    .eq('store_id', storeId)
     .gte('sale_date', startDate)
     .lte('sale_date', endDate)
     .neq('payment_status', 'cancelled')
     .returns<SalesTotalRow[]>();
 }
 
-export async function findOpenReceivableAmounts() {
+export async function findOpenReceivableAmounts(storeId: string) {
   const supabase = await createClient();
 
   return supabase
     .from('receivables')
     .select('amount')
+    .eq('store_id', storeId)
     .eq('status', 'open')
     .returns<ReceivableAmountRow[]>();
 }
 
-export async function findOverdueReceivableAmounts() {
+export async function findOverdueReceivableAmounts(storeId: string) {
   const supabase = await createClient();
 
   return supabase
     .from('receivables')
     .select('amount')
+    .eq('store_id', storeId)
     .eq('status', 'overdue')
     .returns<ReceivableAmountRow[]>();
 }
 
-export async function findDebtorCustomerIds() {
+export async function findDebtorCustomerIds(storeId: string) {
   const supabase = await createClient();
 
   return supabase
     .from('receivables')
     .select('customer_id')
+    .eq('store_id', storeId)
     .in('status', ['open', 'overdue'])
     .returns<DebtorCustomerRow[]>();
 }
 
 export async function findUpcomingReceivables(
+  storeId: string,
   startDate: string,
   endDate: string,
   limit: number
@@ -106,6 +112,7 @@ export async function findUpcomingReceivables(
         customers ( name )
       `
     )
+    .eq('store_id', storeId)
     .eq('status', 'open')
     .gte('due_date', startDate)
     .lte('due_date', endDate)
@@ -114,7 +121,7 @@ export async function findUpcomingReceivables(
     .returns<UpcomingReceivableQueryRow[]>();
 }
 
-export async function findRecentSales(limit: number) {
+export async function findRecentSales(storeId: string, limit: number) {
   const supabase = await createClient();
 
   return supabase
@@ -129,6 +136,7 @@ export async function findRecentSales(limit: number) {
         customers ( name )
       `
     )
+    .eq('store_id', storeId)
     .neq('payment_status', 'cancelled')
     .order('sale_date', { ascending: false })
     .order('created_at', { ascending: false })

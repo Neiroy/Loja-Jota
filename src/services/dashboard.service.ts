@@ -2,6 +2,7 @@ import {
   getCurrentMonthLabel,
   getLocalDateRange,
 } from '@/features/dashboard/utils/get-local-date-range';
+import { getCurrentStoreId } from '@/lib/tenant/get-current-store';
 import * as dashboardRepository from '@/repositories/dashboard.repository';
 import * as receivablesRepository from '@/repositories/receivables.repository';
 import type { DashboardSnapshot } from '@/types/dashboard.types';
@@ -25,8 +26,8 @@ function countDistinctCustomerIds(
   return new Set(rows.map((row) => row.customer_id)).size;
 }
 
-async function syncOverdueReceivables() {
-  const { error } = await receivablesRepository.syncOverdue();
+async function syncOverdueReceivables(storeId: string) {
+  const { error } = await receivablesRepository.syncOverdue(storeId);
 
   if (error) {
     throw new DashboardServiceError(
@@ -37,9 +38,10 @@ async function syncOverdueReceivables() {
 }
 
 export async function getSnapshot(): Promise<DashboardSnapshot> {
+  const storeId = await getCurrentStoreId();
   const { today, monthStart, monthEnd, todayPlus7 } = getLocalDateRange();
 
-  await syncOverdueReceivables();
+  await syncOverdueReceivables(storeId);
 
   const [
     salesTodayResult,
@@ -50,17 +52,22 @@ export async function getSnapshot(): Promise<DashboardSnapshot> {
     upcomingReceivablesResult,
     recentSalesResult,
   ] = await Promise.all([
-    dashboardRepository.findSalesTotalsBetweenDates(today, today),
-    dashboardRepository.findSalesTotalsBetweenDates(monthStart, monthEnd),
-    dashboardRepository.findOpenReceivableAmounts(),
-    dashboardRepository.findOverdueReceivableAmounts(),
-    dashboardRepository.findDebtorCustomerIds(),
+    dashboardRepository.findSalesTotalsBetweenDates(storeId, today, today),
+    dashboardRepository.findSalesTotalsBetweenDates(
+      storeId,
+      monthStart,
+      monthEnd
+    ),
+    dashboardRepository.findOpenReceivableAmounts(storeId),
+    dashboardRepository.findOverdueReceivableAmounts(storeId),
+    dashboardRepository.findDebtorCustomerIds(storeId),
     dashboardRepository.findUpcomingReceivables(
+      storeId,
       today,
       todayPlus7,
       UPCOMING_RECEIVABLES_LIMIT
     ),
-    dashboardRepository.findRecentSales(RECENT_SALES_LIMIT),
+    dashboardRepository.findRecentSales(storeId, RECENT_SALES_LIMIT),
   ]);
 
   const queryErrors = [

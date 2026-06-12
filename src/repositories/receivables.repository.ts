@@ -103,18 +103,20 @@ function mapReceivableDetail(row: ReceivableDetailQueryRow): ReceivableDetail {
   };
 }
 
-export async function syncOverdue() {
+export async function syncOverdue(storeId: string) {
   const supabase = await createClient();
   const today = new Date().toISOString().slice(0, 10);
 
   return supabase
     .from('receivables')
     .update({ status: 'overdue' })
+    .eq('store_id', storeId)
     .eq('status', 'open')
     .lt('due_date', today);
 }
 
 export async function findAll(
+  storeId: string,
   filters: ListReceivablesFilters = { status: 'all' }
 ) {
   const supabase = await createClient();
@@ -138,6 +140,7 @@ export async function findAll(
         sales ( sale_date, total )
       `
     )
+    .eq('store_id', storeId)
     .order('due_date', { ascending: true })
     .order('created_at', { ascending: false });
 
@@ -165,7 +168,7 @@ export async function findAll(
   return query.returns<ReceivableListQueryRow[]>();
 }
 
-export async function findByIdWithDetails(id: string) {
+export async function findByIdWithDetails(storeId: string, id: string) {
   const supabase = await createClient();
 
   return supabase
@@ -188,6 +191,7 @@ export async function findByIdWithDetails(id: string) {
       `
     )
     .eq('id', id)
+    .eq('store_id', storeId)
     .maybeSingle<ReceivableDetailQueryRow>();
 }
 

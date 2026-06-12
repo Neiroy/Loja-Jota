@@ -14,7 +14,15 @@ import {
 } from '@/components/ui/sheet';
 import { NAV_ITEMS } from '@/lib/constants/navigation';
 
-export function MobileSidebar() {
+type MobileSidebarProps = {
+  storeName: string;
+  storeMonogram: string;
+};
+
+export function MobileSidebar({
+  storeName,
+  storeMonogram,
+}: MobileSidebarProps) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -38,11 +46,11 @@ export function MobileSidebar() {
               aria-hidden
               className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-stone-900 text-xs font-semibold tracking-wide text-white shadow-[0_2px_8px_rgba(28,25,23,0.2)]"
             >
-              LJ
+              {storeMonogram}
             </div>
             <div className="min-w-0">
               <SheetTitle className="truncate text-sm font-semibold tracking-tight text-stone-900">
-                Loja Jota
+                {storeName}
               </SheetTitle>
               <p className="truncate text-[11px] font-normal text-stone-500">
                 Controle interno

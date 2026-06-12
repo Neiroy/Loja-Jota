@@ -142,6 +142,7 @@ function mapSaleDetail(row: SaleDetailQueryRow): SaleDetail {
 }
 
 export async function findAll(
+  storeId: string,
   filters: ListSalesFilters = {
     payment_status: 'all',
     payment_method: undefined,
@@ -167,6 +168,7 @@ export async function findAll(
         customers ( name )
       `
     )
+    .eq('store_id', storeId)
     .order('sale_date', { ascending: false })
     .order('created_at', { ascending: false });
 
@@ -194,7 +196,7 @@ export async function findAll(
   return query.returns<SaleListQueryRow[]>();
 }
 
-export async function findByIdWithDetails(id: string) {
+export async function findByIdWithDetails(storeId: string, id: string) {
   const supabase = await createClient();
 
   return supabase
@@ -231,6 +233,7 @@ export async function findByIdWithDetails(id: string) {
       `
     )
     .eq('id', id)
+    .eq('store_id', storeId)
     .maybeSingle<SaleDetailQueryRow>();
 }
 

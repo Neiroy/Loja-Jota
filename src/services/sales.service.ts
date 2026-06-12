@@ -1,3 +1,4 @@
+import { getCurrentStoreId } from '@/lib/tenant/get-current-store';
 import * as salesRepository from '@/repositories/sales.repository';
 import {
   createSaleSchema,
@@ -30,6 +31,7 @@ function mapRpcErrorMessage(message?: string): string {
   }
 
   const knownMessages = [
+    'Usuário não vinculado a uma loja.',
     'Cliente não encontrado ou inativo.',
     'A venda deve ter pelo menos um item.',
     'Produto inválido no item da venda.',
@@ -70,7 +72,8 @@ export async function list(
     return [];
   }
 
-  const { data, error } = await salesRepository.findAll(parsed.data);
+  const storeId = await getCurrentStoreId();
+  const { data, error } = await salesRepository.findAll(storeId, parsed.data);
 
   if (error) {
     throw new SaleServiceError(
@@ -89,7 +92,9 @@ export async function getByIdWithDetails(id: string): Promise<SaleDetail> {
     throw new SaleServiceError('Identificador inválido.', 'INVALID_ID');
   }
 
+  const storeId = await getCurrentStoreId();
   const { data, error } = await salesRepository.findByIdWithDetails(
+    storeId,
     parsedId.data
   );
 
@@ -113,6 +118,8 @@ export async function create(input: CreateSaleInput): Promise<string> {
   if (!parsed.success) {
     throw new SaleServiceError('Dados da venda inválidos.', 'VALIDATION');
   }
+
+  await getCurrentStoreId();
 
   const { data, error } = await salesRepository.createSaleWithItems({
     customer_id: parsed.data.customer_id,

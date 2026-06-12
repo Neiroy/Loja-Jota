@@ -1,3 +1,4 @@
+import { getCurrentStoreId } from '@/lib/tenant/get-current-store';
 import * as customersRepository from '@/repositories/customers.repository';
 import {
   createCustomerSchema,
@@ -27,7 +28,8 @@ export class CustomerServiceError extends Error {
 function isDuplicateCpfError(error: { code?: string; message?: string }) {
   return (
     error.code === '23505' &&
-    (error.message?.includes('idx_customers_cpf') ||
+    (error.message?.includes('idx_customers_store_cpf') ||
+      error.message?.includes('idx_customers_cpf') ||
       error.message?.includes('customers_cpf'))
   );
 }
@@ -61,7 +63,11 @@ export async function list(
     return [];
   }
 
-  const { data, error } = await customersRepository.findAll(parsed.data);
+  const storeId = await getCurrentStoreId();
+  const { data, error } = await customersRepository.findAll(
+    storeId,
+    parsed.data
+  );
 
   if (error) {
     throw new CustomerServiceError(
@@ -80,7 +86,11 @@ export async function getById(id: string): Promise<Customer> {
     throw new CustomerServiceError('Identificador inválido.', 'INVALID_ID');
   }
 
-  const { data, error } = await customersRepository.findById(parsedId.data);
+  const storeId = await getCurrentStoreId();
+  const { data, error } = await customersRepository.findById(
+    storeId,
+    parsedId.data
+  );
 
   if (error) {
     throw new CustomerServiceError(
@@ -103,13 +113,14 @@ export async function create(input: CreateCustomerInput): Promise<Customer> {
     throw new CustomerServiceError('Dados do cliente inválidos.', 'INVALID_ID');
   }
 
+  const storeId = await getCurrentStoreId();
   const payload = normalizeCreateInput(parsed.data);
-  const { data, error } = await customersRepository.insert(payload);
+  const { data, error } = await customersRepository.insert(storeId, payload);
 
   if (error) {
     if (isDuplicateCpfError(error)) {
       throw new CustomerServiceError(
-        'CPF já cadastrado para outro cliente.',
+        'CPF já cadastrado para outro cliente nesta loja.',
         'DUPLICATE_CPF'
       );
     }
@@ -148,8 +159,10 @@ export async function update(
 
   await getById(parsedId.data);
 
+  const storeId = await getCurrentStoreId();
   const payload = normalizeUpdateInput(parsed.data);
   const { data, error } = await customersRepository.update(
+    storeId,
     parsedId.data,
     payload
   );
@@ -157,7 +170,7 @@ export async function update(
   if (error) {
     if (isDuplicateCpfError(error)) {
       throw new CustomerServiceError(
-        'CPF já cadastrado para outro cliente.',
+        'CPF já cadastrado para outro cliente nesta loja.',
         'DUPLICATE_CPF'
       );
     }
@@ -187,9 +200,14 @@ export async function setStatus(
 
   await getById(parsedId.data);
 
-  const { data, error } = await customersRepository.update(parsedId.data, {
-    is_active: isActive,
-  });
+  const storeId = await getCurrentStoreId();
+  const { data, error } = await customersRepository.update(
+    storeId,
+    parsedId.data,
+    {
+      is_active: isActive,
+    }
+  );
 
   if (error) {
     throw new CustomerServiceError(

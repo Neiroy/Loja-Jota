@@ -1,3 +1,4 @@
+import { getCurrentStoreId } from '@/lib/tenant/get-current-store';
 import * as productsRepository from '@/repositories/products.repository';
 import {
   createProductSchema,
@@ -61,7 +62,11 @@ export async function list(
     return [];
   }
 
-  const { data, error } = await productsRepository.findAll(parsed.data);
+  const storeId = await getCurrentStoreId();
+  const { data, error } = await productsRepository.findAll(
+    storeId,
+    parsed.data
+  );
 
   if (error) {
     throw new ProductServiceError(
@@ -80,7 +85,11 @@ export async function getById(id: string): Promise<Product> {
     throw new ProductServiceError('Identificador inválido.', 'INVALID_ID');
   }
 
-  const { data, error } = await productsRepository.findById(parsedId.data);
+  const storeId = await getCurrentStoreId();
+  const { data, error } = await productsRepository.findById(
+    storeId,
+    parsedId.data
+  );
 
   if (error) {
     throw new ProductServiceError(
@@ -103,8 +112,9 @@ export async function create(input: CreateProductInput): Promise<Product> {
     throw new ProductServiceError('Dados do produto inválidos.', 'INVALID_ID');
   }
 
+  const storeId = await getCurrentStoreId();
   const payload = normalizeCreateInput(parsed.data);
-  const { data, error } = await productsRepository.insert(payload);
+  const { data, error } = await productsRepository.insert(storeId, payload);
 
   if (error) {
     throw new ProductServiceError(
@@ -141,8 +151,10 @@ export async function update(
 
   await getById(parsedId.data);
 
+  const storeId = await getCurrentStoreId();
   const payload = normalizeUpdateInput(parsed.data);
   const { data, error } = await productsRepository.update(
+    storeId,
     parsedId.data,
     payload
   );
@@ -173,9 +185,14 @@ export async function setStatus(
 
   await getById(parsedId.data);
 
-  const { data, error } = await productsRepository.update(parsedId.data, {
-    is_active: isActive,
-  });
+  const storeId = await getCurrentStoreId();
+  const { data, error } = await productsRepository.update(
+    storeId,
+    parsedId.data,
+    {
+      is_active: isActive,
+    }
+  );
 
   if (error) {
     throw new ProductServiceError(

@@ -1,5 +1,6 @@
 import { formatProfileRole } from '@/features/settings/utils/format-profile-role';
 import { getEnvironmentLabel } from '@/features/settings/utils/get-environment-label';
+import { getCurrentStoreDisplayName } from '@/lib/tenant/get-current-store';
 import * as authRepository from '@/repositories/auth.repository';
 import * as profilesRepository from '@/repositories/profiles.repository';
 import type { SettingsOverview } from '@/types/settings.types';
@@ -32,12 +33,13 @@ function resolveFullName(
   return 'Usuário';
 }
 
-function buildStaticOverview(
+function buildOverview(
+  storeName: string,
   account: SettingsOverview['account']
 ): SettingsOverview {
   return {
     store: {
-      name: 'Loja Jota',
+      name: storeName,
       type: 'Sistema interno',
       status: 'Ativo',
       environment: getEnvironmentLabel(),
@@ -65,6 +67,8 @@ function buildStaticOverview(
 }
 
 export async function getOverview(): Promise<SettingsOverview> {
+  const storeName = await getCurrentStoreDisplayName();
+
   const { user } = await authRepository.getUser();
 
   const email = user?.email ?? '—';
@@ -85,7 +89,7 @@ export async function getOverview(): Promise<SettingsOverview> {
     }
   }
 
-  return buildStaticOverview({
+  return buildOverview(storeName, {
     fullName,
     email,
     roleLabel,

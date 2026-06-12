@@ -11,13 +11,17 @@ export type FindAllProductsParams = {
   status?: ProductStatusFilter;
 };
 
-export async function findAll(params: FindAllProductsParams = {}) {
+export async function findAll(
+  storeId: string,
+  params: FindAllProductsParams = {}
+) {
   const supabase = await createClient();
   const { search, status = 'all' } = params;
 
   let query = supabase
     .from('products')
     .select('*')
+    .eq('store_id', storeId)
     .order('name', { ascending: true });
 
   if (status === 'active') {
@@ -43,29 +47,35 @@ export async function findAll(params: FindAllProductsParams = {}) {
   return query.returns<Product[]>();
 }
 
-export async function findById(id: string) {
+export async function findById(storeId: string, id: string) {
   const supabase = await createClient();
 
   return supabase
     .from('products')
     .select('*')
     .eq('id', id)
+    .eq('store_id', storeId)
     .maybeSingle<Product>();
 }
 
-export async function insert(data: ProductInsert) {
+export async function insert(storeId: string, data: ProductInsert) {
   const supabase = await createClient();
 
-  return supabase.from('products').insert(data).select('*').single<Product>();
+  return supabase
+    .from('products')
+    .insert({ ...data, store_id: storeId })
+    .select('*')
+    .single<Product>();
 }
 
-export async function update(id: string, data: ProductUpdate) {
+export async function update(storeId: string, id: string, data: ProductUpdate) {
   const supabase = await createClient();
 
   return supabase
     .from('products')
     .update(data)
     .eq('id', id)
+    .eq('store_id', storeId)
     .select('*')
     .single<Product>();
 }

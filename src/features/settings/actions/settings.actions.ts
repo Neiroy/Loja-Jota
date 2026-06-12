@@ -6,7 +6,7 @@ import type { SettingsOverview } from '@/types/settings.types';
 
 const FALLBACK_OVERVIEW: SettingsOverview = {
   store: {
-    name: 'Loja Jota',
+    name: 'Loja não identificada',
     type: 'Sistema interno',
     status: 'Ativo',
     environment: 'Desenvolvimento',

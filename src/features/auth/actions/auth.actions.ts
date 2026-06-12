@@ -2,6 +2,7 @@
 
 import { redirect } from 'next/navigation';
 
+import { AuthServiceError } from '@/services/auth.service';
 import * as authService from '@/services/auth.service';
 import { loginSchema } from '@/schemas/auth.schema';
 import type { ActionResult } from '@/types/action.types';
@@ -39,7 +40,14 @@ export async function login(input: unknown): Promise<ActionResult<AuthUser>> {
     const user = await authService.login(parsed.data);
 
     return { success: true, data: user };
-  } catch {
+  } catch (error) {
+    if (error instanceof AuthServiceError && error.code === 'NO_STORE') {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+
     return {
       success: false,
       error: 'E-mail ou senha inválidos.',

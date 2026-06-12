@@ -1,3 +1,4 @@
+import { getCurrentStoreId } from '@/lib/tenant/get-current-store';
 import * as receivablesRepository from '@/repositories/receivables.repository';
 import {
   listReceivablesSchema,
@@ -33,6 +34,7 @@ function mapRpcErrorMessage(message?: string): string {
   }
 
   const knownMessages = [
+    'Usuário não vinculado a uma loja.',
     'Fiado não encontrado.',
     'Fiado já está quitado.',
     'Fiado cancelado não pode ser quitado.',
@@ -48,8 +50,8 @@ function mapRpcErrorMessage(message?: string): string {
   return 'Não foi possível quitar o fiado.';
 }
 
-async function syncOverdueReceivables() {
-  const { error } = await receivablesRepository.syncOverdue();
+async function syncOverdueReceivables(storeId: string) {
+  const { error } = await receivablesRepository.syncOverdue(storeId);
 
   if (error) {
     throw new ReceivableServiceError(
@@ -68,9 +70,13 @@ export async function list(
     return [];
   }
 
-  await syncOverdueReceivables();
+  const storeId = await getCurrentStoreId();
+  await syncOverdueReceivables(storeId);
 
-  const { data, error } = await receivablesRepository.findAll(parsed.data);
+  const { data, error } = await receivablesRepository.findAll(
+    storeId,
+    parsed.data
+  );
 
   if (error) {
     throw new ReceivableServiceError(
@@ -91,9 +97,11 @@ export async function getByIdWithDetails(
     throw new ReceivableServiceError('Identificador inválido.', 'INVALID_ID');
   }
 
-  await syncOverdueReceivables();
+  const storeId = await getCurrentStoreId();
+  await syncOverdueReceivables(storeId);
 
   const { data, error } = await receivablesRepository.findByIdWithDetails(
+    storeId,
     parsedId.data
   );
 
@@ -123,7 +131,8 @@ export async function markAsPaid(
     );
   }
 
-  await syncOverdueReceivables();
+  const storeId = await getCurrentStoreId();
+  await syncOverdueReceivables(storeId);
 
   const { data, error } = await receivablesRepository.markAsPaid(
     parsed.data.receivable_id,
