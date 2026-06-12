@@ -77,11 +77,11 @@ RLS **habilitado em todas as tabelas**: `profiles`, `customers`, `products`, `sa
 
 ## Proteção de secrets
 
-| Variável                        | Onde usar                   | Nunca expor   |
-| ------------------------------- | --------------------------- | ------------- |
-| `NEXT_PUBLIC_SUPABASE_URL`      | Client + Server             | —             |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Client + Server             | —             |
-| `SUPABASE_SERVICE_ROLE_KEY`     | Server only (se necessário) | Client bundle |
+| Variável                        | Onde usar                              | Nunca expor   |
+| ------------------------------- | -------------------------------------- | ------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`      | Client + Server                        | —             |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Client + Server                        | —             |
+| `SUPABASE_SERVICE_ROLE_KEY`     | Server only (provisionamento de lojas) | Client bundle |
 
 - Arquivo `.env.local` para desenvolvimento
 - `.env.local` no `.gitignore`
@@ -98,6 +98,12 @@ RLS **habilitado em todas as tabelas**: `profiles`, `customers`, `products`, `sa
   - Repositories
   - Middleware
 - Client Supabase (`src/lib/supabase/client.ts`) apenas para auth UI (login form)
+- Supabase Admin Client (`src/lib/supabase/admin.ts`) **somente** para provisionamento de lojas:
+  - Requer `SUPABASE_SERVICE_ROLE_KEY` no servidor
+  - Requer `STORE_PROVISIONING_ENABLED=true`
+  - Requer `profiles.role === 'admin'`
+  - Usado em `stores-admin.repository.ts`, `auth-admin.repository.ts`, `profiles-admin.repository.ts`
+  - **Nunca** importar em Client Components
 
 ---
 

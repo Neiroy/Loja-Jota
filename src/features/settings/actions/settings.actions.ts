@@ -16,6 +16,7 @@ const FALLBACK_OVERVIEW: SettingsOverview = {
     email: '—',
     roleLabel: 'Operador',
     authProvider: 'Supabase Auth',
+    canManageStores: false,
   },
   preferences: {
     creditTermDays: 30,

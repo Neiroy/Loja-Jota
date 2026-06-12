@@ -298,6 +298,30 @@ Fase 11 concluída.
 
 ---
 
+## Fase 13 — Provisionamento de lojas (Configurações) ✅
+
+**Status:** Concluída
+
+### Entregáveis
+
+- [x] `src/lib/supabase/admin.ts` — client admin server-only
+- [x] `src/lib/tenant/require-store-provisioner.ts` — gate admin + `STORE_PROVISIONING_ENABLED`
+- [x] Repositories admin: `stores-admin`, `auth-admin`, `profiles-admin`
+- [x] `src/features/stores/` — schema, service, actions, UI
+- [x] `/configuracoes/lojas` — listagem e criação de loja + usuário
+- [x] Card “Gerenciar lojas” em Configurações (somente admin)
+- [x] `.env.example` — `SUPABASE_SERVICE_ROLE_KEY`, `STORE_PROVISIONING_ENABLED`
+
+### Critério de conclusão
+
+Admin provisiona loja + usuário; isolamento multi-loja preservado; `npm run lint && npm run build && npm run format:check` passando.
+
+### Dependências
+
+Fase 12 (multi-loja) concluída.
+
+---
+
 ## Pós-MVP — Deploy e homologação
 
 ### Etapa 1 — Documentação ✅

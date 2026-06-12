@@ -1,6 +1,7 @@
 import { formatProfileRole } from '@/features/settings/utils/format-profile-role';
 import { getEnvironmentLabel } from '@/features/settings/utils/get-environment-label';
 import { getCurrentStoreDisplayName } from '@/lib/tenant/get-current-store';
+import { canManageStores } from '@/lib/tenant/require-store-provisioner';
 import * as authRepository from '@/repositories/auth.repository';
 import * as profilesRepository from '@/repositories/profiles.repository';
 import type { SettingsOverview } from '@/types/settings.types';
@@ -79,6 +80,7 @@ export async function getOverview(): Promise<SettingsOverview> {
 
   let roleLabel = formatProfileRole('operator');
   let fullName = resolveFullName(undefined, metadataName, email);
+  let manageStores = false;
 
   if (user?.id) {
     const { data: profile } = await profilesRepository.findById(user.id);
@@ -89,10 +91,13 @@ export async function getOverview(): Promise<SettingsOverview> {
     }
   }
 
+  manageStores = await canManageStores();
+
   return buildOverview(storeName, {
     fullName,
     email,
     roleLabel,
     authProvider: 'Supabase Auth',
+    canManageStores: manageStores,
   });
 }

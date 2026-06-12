@@ -1,5 +1,6 @@
 import type { LucideIcon } from 'lucide-react';
 import {
+  Building2,
   Info,
   LayoutGrid,
   Shield,
@@ -7,10 +8,12 @@ import {
   Store,
   UserRound,
 } from 'lucide-react';
+import Link from 'next/link';
 
 import { StatusBadge } from '@/components/shared/status-badge';
 import { SettingsDetailField } from '@/features/settings/components/settings-detail-field';
 import { SettingsModuleBadges } from '@/features/settings/components/settings-module-badges';
+import { buttonVariants } from '@/components/ui/button';
 import { surfaceCardClassName } from '@/lib/surface';
 import { cn } from '@/lib/utils';
 import type { SettingsOverview } from '@/types/settings.types';
@@ -95,6 +98,27 @@ export function SettingsOverview({ overview }: SettingsOverviewProps) {
           />
         </div>
       </SettingsSection>
+
+      {overview.account.canManageStores ? (
+        <SettingsSection
+          title="Lojas cadastradas"
+          description="Crie e gerencie lojas e usuários de acesso."
+          icon={Building2}
+        >
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-stone-600">
+              Provisione novas lojas e o primeiro usuário de login de forma
+              centralizada.
+            </p>
+            <Link
+              href="/configuracoes/lojas"
+              className={cn(buttonVariants(), 'shrink-0')}
+            >
+              Gerenciar lojas
+            </Link>
+          </div>
+        </SettingsSection>
+      ) : null}
 
       <SettingsSection
         title="Preferências operacionais"

@@ -1,3 +1,9 @@
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Controle de Vendas',
+};
+
 export default function AuthLayout({
   children,
 }: Readonly<{

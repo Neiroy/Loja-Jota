@@ -17,6 +17,7 @@ export type SettingsOverview = {
     email: string;
     roleLabel: string;
     authProvider: string;
+    canManageStores: boolean;
   };
   preferences: {
     creditTermDays: number;

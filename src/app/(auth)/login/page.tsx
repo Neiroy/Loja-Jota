@@ -6,7 +6,7 @@ import { LoginForm } from '@/features/auth/components/login-form';
 export default function LoginPage() {
   return (
     <AuthCard
-      title="Loja Jota"
+      title="Controle de Vendas"
       description="Acesso ao painel interno de controle"
     >
       <Suspense

@@ -172,7 +172,7 @@ export type Database = {
         Row: Profile;
         Insert: Pick<Profile, 'id' | 'full_name' | 'store_id'> &
           Partial<Pick<Profile, 'role'>>;
-        Update: Partial<Pick<Profile, 'full_name' | 'role'>>;
+        Update: Partial<Pick<Profile, 'full_name' | 'role' | 'store_id'>>;
       };
       customers: {
         Row: Customer;
