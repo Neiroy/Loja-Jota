@@ -42,6 +42,13 @@ function isForeignKeyError(error: { code?: string }) {
 const CUSTOMER_HAS_LINKS_MESSAGE =
   'Este cliente possui histórico financeiro. Use a opção Inativar cliente.';
 
+const CUSTOMER_NOT_DELETED_MESSAGE =
+  'Cliente não encontrado ou não pertence a esta loja.';
+
+function isNoRowsDeletedError(error: { code?: string }) {
+  return error.code === 'PGRST116';
+}
+
 function normalizeCreateInput(input: CreateCustomerInput) {
   return {
     name: input.name.trim(),
@@ -255,7 +262,7 @@ export async function remove(id: string): Promise<void> {
     throw new CustomerServiceError(CUSTOMER_HAS_LINKS_MESSAGE, 'HAS_LINKS');
   }
 
-  const { error } = await customersRepository.deleteById(
+  const { data, error } = await customersRepository.deleteById(
     storeId,
     parsedId.data
   );
@@ -265,9 +272,17 @@ export async function remove(id: string): Promise<void> {
       throw new CustomerServiceError(CUSTOMER_HAS_LINKS_MESSAGE, 'HAS_LINKS');
     }
 
+    if (isNoRowsDeletedError(error)) {
+      throw new CustomerServiceError(CUSTOMER_NOT_DELETED_MESSAGE, 'NOT_FOUND');
+    }
+
     throw new CustomerServiceError(
       'Não foi possível excluir o cliente.',
       'DATABASE'
     );
+  }
+
+  if (!data?.id) {
+    throw new CustomerServiceError(CUSTOMER_NOT_DELETED_MESSAGE, 'NOT_FOUND');
   }
 }

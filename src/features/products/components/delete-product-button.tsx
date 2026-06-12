@@ -20,14 +20,19 @@ export function DeleteProductButton({
 }: DeleteProductButtonProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   function handleConfirm() {
+    setError(null);
+
     startTransition(async () => {
       const result = await deleteProductAction(productId);
 
       if (!result.success) {
-        toast.error(result.error ?? 'Não foi possível excluir o produto.');
+        const message = result.error ?? 'Não foi possível excluir o produto.';
+        setError(message);
+        toast.error(message);
         return;
       }
 
@@ -52,9 +57,18 @@ export function DeleteProductButton({
         {isPending ? 'Processando...' : 'Excluir produto'}
       </Button>
 
+      {error ? <p className="text-destructive text-sm">{error}</p> : null}
+
       <ConfirmDialog
         open={open}
-        onOpenChange={setOpen}
+        onOpenChange={(nextOpen) => {
+          if (!isPending) {
+            setOpen(nextOpen);
+            if (!nextOpen) {
+              setError(null);
+            }
+          }
+        }}
         title="Excluir produto?"
         description="Essa ação só será permitida se o produto não possuir vendas vinculadas."
         confirmLabel="Excluir produto"

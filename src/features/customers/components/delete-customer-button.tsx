@@ -20,14 +20,19 @@ export function DeleteCustomerButton({
 }: DeleteCustomerButtonProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   function handleConfirm() {
+    setError(null);
+
     startTransition(async () => {
       const result = await deleteCustomerAction(customerId);
 
       if (!result.success) {
-        toast.error(result.error ?? 'Não foi possível excluir o cliente.');
+        const message = result.error ?? 'Não foi possível excluir o cliente.';
+        setError(message);
+        toast.error(message);
         return;
       }
 
@@ -52,9 +57,18 @@ export function DeleteCustomerButton({
         {isPending ? 'Processando...' : 'Excluir cliente'}
       </Button>
 
+      {error ? <p className="text-destructive text-sm">{error}</p> : null}
+
       <ConfirmDialog
         open={open}
-        onOpenChange={setOpen}
+        onOpenChange={(nextOpen) => {
+          if (!isPending) {
+            setOpen(nextOpen);
+            if (!nextOpen) {
+              setError(null);
+            }
+          }
+        }}
         title="Excluir cliente?"
         description="Essa ação só será permitida se o cliente não possuir vendas ou fiados vinculados."
         confirmLabel="Excluir cliente"

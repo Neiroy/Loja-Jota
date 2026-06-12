@@ -24,8 +24,15 @@ export class ProductServiceError extends Error {
 const PRODUCT_HAS_LINKS_MESSAGE =
   'Este produto possui vendas vinculadas. Use a opção Inativar produto.';
 
+const PRODUCT_NOT_DELETED_MESSAGE =
+  'Produto não encontrado ou não pertence a esta loja.';
+
 function isForeignKeyError(error: { code?: string }) {
   return error.code === '23503';
+}
+
+function isNoRowsDeletedError(error: { code?: string }) {
+  return error.code === 'PGRST116';
 }
 
 function normalizeCreateInput(input: CreateProductInput) {
@@ -241,16 +248,27 @@ export async function remove(id: string): Promise<void> {
     throw new ProductServiceError(PRODUCT_HAS_LINKS_MESSAGE, 'HAS_LINKS');
   }
 
-  const { error } = await productsRepository.deleteById(storeId, parsedId.data);
+  const { data, error } = await productsRepository.deleteById(
+    storeId,
+    parsedId.data
+  );
 
   if (error) {
     if (isForeignKeyError(error)) {
       throw new ProductServiceError(PRODUCT_HAS_LINKS_MESSAGE, 'HAS_LINKS');
     }
 
+    if (isNoRowsDeletedError(error)) {
+      throw new ProductServiceError(PRODUCT_NOT_DELETED_MESSAGE, 'NOT_FOUND');
+    }
+
     throw new ProductServiceError(
       'Não foi possível excluir o produto.',
       'DATABASE'
     );
+  }
+
+  if (!data?.id) {
+    throw new ProductServiceError(PRODUCT_NOT_DELETED_MESSAGE, 'NOT_FOUND');
   }
 }

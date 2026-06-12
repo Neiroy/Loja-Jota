@@ -126,5 +126,7 @@ export async function deleteById(storeId: string, id: string) {
     .from('customers')
     .delete()
     .eq('id', id)
-    .eq('store_id', storeId);
+    .eq('store_id', storeId)
+    .select('id')
+    .single<{ id: string }>();
 }

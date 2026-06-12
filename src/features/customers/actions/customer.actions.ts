@@ -170,6 +170,7 @@ export async function deleteCustomerAction(
     await customersService.remove(parsedId.data);
 
     revalidatePath('/clientes');
+    revalidatePath(`/clientes/${parsedId.data}`);
 
     return { success: true };
   } catch (error) {

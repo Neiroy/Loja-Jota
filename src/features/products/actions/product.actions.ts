@@ -172,6 +172,7 @@ export async function deleteProductAction(
     await productsService.remove(parsedId.data);
 
     revalidatePath('/produtos');
+    revalidatePath(`/produtos/${parsedId.data}`);
 
     return { success: true };
   } catch (error) {
