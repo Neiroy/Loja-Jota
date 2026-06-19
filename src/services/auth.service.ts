@@ -1,10 +1,13 @@
-import type { User } from '@supabase/supabase-js';
+﻿import type { User } from '@supabase/supabase-js';
 
 import { StoreContextError } from '@/lib/tenant/store-errors';
 import * as authRepository from '@/repositories/auth.repository';
 import * as profilesRepository from '@/repositories/profiles.repository';
 import type { LoginInput } from '@/schemas/auth.schema';
 import type { AuthUser } from '@/types/auth.types';
+
+const NO_STORE_MESSAGE =
+  'Seu usuário ainda não está vinculado a uma loja. Fale com o administrador.';
 
 export class AuthServiceError extends Error {
   constructor(
@@ -36,6 +39,23 @@ function isProfileNotFoundError(error: { code?: string; message?: string }) {
   );
 }
 
+function isNoStoreError(error: unknown): boolean {
+  if (error instanceof AuthServiceError) {
+    return error.code === 'NO_STORE';
+  }
+
+  if (error instanceof StoreContextError) {
+    return error.code === 'NO_STORE' || error.code === 'NO_PROFILE';
+  }
+
+  return false;
+}
+
+async function signOutAndThrowNoStore(): Promise<never> {
+  await authRepository.signOut();
+  throw new AuthServiceError(NO_STORE_MESSAGE, 'NO_STORE');
+}
+
 async function ensureProfileWithStore(user: AuthUser) {
   const { error: syncError } = await profilesRepository.syncFullNameOnLogin(
     user.id,
@@ -44,10 +64,7 @@ async function ensureProfileWithStore(user: AuthUser) {
 
   if (syncError) {
     if (isProfileNotFoundError(syncError)) {
-      throw new AuthServiceError(
-        'Conta não vinculada a uma loja. Contate o administrador.',
-        'NO_STORE'
-      );
+      await signOutAndThrowNoStore();
     }
 
     throw new AuthServiceError(
@@ -60,10 +77,7 @@ async function ensureProfileWithStore(user: AuthUser) {
     await profilesRepository.findById(user.id);
 
   if (profileError || !profile?.store_id) {
-    throw new AuthServiceError(
-      'Conta não vinculada a uma loja. Contate o administrador.',
-      'NO_STORE'
-    );
+    await signOutAndThrowNoStore();
   }
 }
 
@@ -85,12 +99,16 @@ export async function login(input: LoginInput): Promise<AuthUser> {
   try {
     await ensureProfileWithStore(user);
   } catch (error) {
-    if (error instanceof AuthServiceError) {
+    if (error instanceof AuthServiceError && error.code === 'NO_STORE') {
       throw error;
     }
 
-    if (error instanceof StoreContextError) {
-      throw new AuthServiceError(error.message, 'NO_STORE');
+    if (isNoStoreError(error)) {
+      await signOutAndThrowNoStore();
+    }
+
+    if (error instanceof AuthServiceError) {
+      throw error;
     }
 
     throw error;
