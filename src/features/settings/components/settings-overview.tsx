@@ -2,7 +2,6 @@ import type { LucideIcon } from 'lucide-react';
 import {
   Building2,
   ImageIcon,
-  Info,
   LayoutGrid,
   Shield,
   SlidersHorizontal,
@@ -198,24 +197,6 @@ export function SettingsOverview({ overview }: SettingsOverviewProps) {
           <SettingsDetailField
             label="Service Role"
             value={overview.security.serviceRole}
-          />
-        </div>
-      </SettingsSection>
-
-      <SettingsSection
-        title="Sobre o sistema"
-        description="Informações técnicas da plataforma."
-        icon={Info}
-      >
-        <div className="grid gap-4 sm:grid-cols-2">
-          <SettingsDetailField label="Versão" value={overview.about.version} />
-          <SettingsDetailField
-            label="Hospedagem"
-            value={overview.about.hosting}
-          />
-          <SettingsDetailField
-            label="Banco de dados"
-            value={overview.about.database}
           />
         </div>
       </SettingsSection>
