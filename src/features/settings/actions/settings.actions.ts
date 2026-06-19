@@ -33,11 +33,6 @@ const FALLBACK_OVERVIEW: SettingsOverview = {
     users: 'Internos (cadastro manual)',
     serviceRole: 'Não utilizada no app',
   },
-  about: {
-    version: 'MVP interno',
-    hosting: 'Vercel',
-    database: 'Supabase',
-  },
 };
 
 export async function getSettingsOverview(): Promise<SettingsOverview> {

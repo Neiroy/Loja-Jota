@@ -34,11 +34,6 @@ export type SettingsOverview = {
     users: string;
     serviceRole: string;
   };
-  about: {
-    version: string;
-    hosting: string;
-    database: string;
-  };
 };
 
 export type { ProfileRole };

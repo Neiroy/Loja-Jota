@@ -61,11 +61,6 @@ function buildOverview(
       users: 'Internos (cadastro manual)',
       serviceRole: 'Não utilizada no app',
     },
-    about: {
-      version: 'MVP interno',
-      hosting: 'Vercel',
-      database: 'Supabase',
-    },
   };
 }
 
