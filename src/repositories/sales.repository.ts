@@ -248,4 +248,12 @@ export async function createSaleWithItems(input: CreateSaleRpcInput) {
   });
 }
 
+export async function cancelSale(saleId: string) {
+  const supabase = await createClient();
+
+  return supabase.rpc('cancel_sale', {
+    p_sale_id: saleId,
+  });
+}
+
 export { mapSaleDetail, mapSaleListRow };

@@ -60,6 +60,26 @@ function mapRpcErrorMessage(message?: string): string {
   return 'Não foi possível registrar a venda.';
 }
 
+function mapCancelRpcErrorMessage(message?: string): string {
+  if (!message) {
+    return 'Não foi possível cancelar a venda.';
+  }
+
+  const knownMessages = [
+    'Usuário não vinculado a uma loja.',
+    'Venda não encontrada.',
+    'Venda já está cancelada.',
+    'Não é possível cancelar venda com fiado já quitado.',
+    'Produto vinculado à venda não foi encontrado.',
+  ];
+
+  if (knownMessages.some((known) => message.includes(known))) {
+    return message;
+  }
+
+  return 'Não foi possível cancelar a venda.';
+}
+
 export async function list(
   filters: ListSalesFilters = {
     payment_status: 'all',
@@ -135,6 +155,31 @@ export async function create(input: CreateSaleInput): Promise<string> {
   if (!data || typeof data !== 'string') {
     throw new SaleServiceError(
       'Não foi possível registrar a venda.',
+      'DATABASE'
+    );
+  }
+
+  return data;
+}
+
+export async function cancel(id: string): Promise<string> {
+  const parsedId = saleIdSchema.safeParse(id);
+
+  if (!parsedId.success) {
+    throw new SaleServiceError('Identificador inválido.', 'INVALID_ID');
+  }
+
+  await getCurrentStoreId();
+
+  const { data, error } = await salesRepository.cancelSale(parsedId.data);
+
+  if (error) {
+    throw new SaleServiceError(mapCancelRpcErrorMessage(error.message), 'RPC');
+  }
+
+  if (!data || typeof data !== 'string') {
+    throw new SaleServiceError(
+      'Não foi possível cancelar a venda.',
       'DATABASE'
     );
   }

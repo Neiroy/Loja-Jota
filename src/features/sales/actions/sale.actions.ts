@@ -106,3 +106,24 @@ export async function createSaleAction(
   revalidatePath(`/clientes/${parsed.data.customer_id}`);
   redirect(`/vendas/${saleId}`);
 }
+
+export async function cancelSaleAction(
+  saleId: string
+): Promise<ActionResult<{ saleId: string }>> {
+  try {
+    const cancelledSaleId = await salesService.cancel(saleId);
+
+    revalidatePath('/vendas');
+    revalidatePath(`/vendas/${cancelledSaleId}`);
+    revalidatePath('/produtos');
+    revalidatePath('/fiados');
+    revalidatePath('/dashboard');
+
+    return {
+      success: true,
+      data: { saleId: cancelledSaleId },
+    };
+  } catch (error) {
+    return handleServiceError(error);
+  }
+}

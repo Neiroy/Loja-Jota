@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 
 import { PageHeader } from '@/components/layout/page-header';
 import { getSale } from '@/features/sales/actions/sale.actions';
+import { CancelSaleButton } from '@/features/sales/components/cancel-sale-button';
 import { SaleDetailCard } from '@/features/sales/components/sale-detail-card';
 import { SaleItemsTable } from '@/features/sales/components/sale-items-table';
 import { SaleReceivableSummary } from '@/features/sales/components/sale-receivable-summary';
@@ -26,6 +27,11 @@ export default async function VendaDetalhePage({
       <PageHeader
         title={`Venda de ${formatSaleDate(sale.sale_date)}`}
         description={`Cliente: ${sale.customer_name}`}
+        action={
+          sale.payment_status !== 'cancelled' ? (
+            <CancelSaleButton saleId={sale.id} />
+          ) : undefined
+        }
       />
       <SaleDetailCard sale={sale} />
       <SaleItemsTable items={sale.items} />
