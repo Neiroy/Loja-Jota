@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { DetailField } from '@/components/shared/detail-field';
 import { FormSection } from '@/components/shared/form-section';
 import { MarkReceivablePaidDialog } from '@/features/receivables/components/mark-receivable-paid-dialog';
+import { WhatsAppReminderButton } from '@/features/receivables/components/whatsapp-reminder-button';
 import { ReceivableStatusBadge } from '@/features/receivables/components/receivable-status-badge';
 import {
   formatReceivableDate,
@@ -33,7 +34,7 @@ export function ReceivableDetailCard({
     <>
       <FormSection
         title="Informações do fiado"
-        description="Controle interno de contas a receber com vencimento em 30 dias."
+        description="Controle interno de contas a receber e parcelas de vendas."
       >
         <div className="grid gap-4 sm:grid-cols-2">
           <DetailField
@@ -62,6 +63,14 @@ export function ReceivableDetailCard({
               >
                 Venda de {formatReceivableDate(receivable.sale_date)}
               </Link>
+            }
+          />
+          <DetailField
+            label="Parcela"
+            value={
+              receivable.installments_total > 1
+                ? `${receivable.installment_number} de ${receivable.installments_total}`
+                : 'Única'
             }
           />
           <DetailField
@@ -105,10 +114,19 @@ export function ReceivableDetailCard({
         </div>
 
         {canSettle ? (
-          <div className="mt-6 border-t border-stone-200/80 pt-5">
+          <div className="mt-6 flex flex-col gap-3 border-t border-stone-200/80 pt-5 sm:flex-row sm:flex-wrap sm:items-center">
             <Button type="button" onClick={() => setDialogOpen(true)}>
               Quitar fiado
             </Button>
+            <WhatsAppReminderButton
+              customerName={receivable.customer_name}
+              customerPhone={receivable.customer_phone}
+              amount={receivable.amount}
+              dueDate={receivable.due_date}
+              installmentNumber={receivable.installment_number}
+              installmentsTotal={receivable.installments_total}
+              status={receivable.status}
+            />
           </div>
         ) : null}
       </FormSection>

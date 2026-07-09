@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 
 import { PageHeader } from '@/components/layout/page-header';
 import { getSale } from '@/features/sales/actions/sale.actions';
+import { saleIdSchema } from '@/schemas/sale.schema';
 import { CancelSaleButton } from '@/features/sales/components/cancel-sale-button';
 import { SaleDetailCard } from '@/features/sales/components/sale-detail-card';
 import { SaleItemsTable } from '@/features/sales/components/sale-items-table';
@@ -16,6 +17,16 @@ export default async function VendaDetalhePage({
   params,
 }: VendaDetalhePageProps) {
   const { id } = await params;
+
+  if (id === 'nova') {
+    const { default: NovaVendaPage } = await import('../nova/page');
+    return NovaVendaPage();
+  }
+
+  if (!saleIdSchema.safeParse(id).success) {
+    notFound();
+  }
+
   const sale = await getSale(id);
 
   if (!sale) {

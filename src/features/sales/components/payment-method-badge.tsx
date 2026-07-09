@@ -13,6 +13,7 @@ type PaymentMethodBadgeProps = {
   method: PaymentMethod;
   cardPaymentType?: CardPaymentType | null;
   installmentsCount?: number | null;
+  financingInstallmentsCount?: number | null;
   className?: string;
 };
 
@@ -20,12 +21,14 @@ export function PaymentMethodBadge({
   method,
   cardPaymentType = null,
   installmentsCount = null,
+  financingInstallmentsCount = null,
   className,
 }: PaymentMethodBadgeProps) {
   const label = getSalePaymentLabel({
     payment_method: method,
     card_payment_type: cardPaymentType,
     installments_count: installmentsCount,
+    financing_installments_count: financingInstallmentsCount,
   });
 
   return (

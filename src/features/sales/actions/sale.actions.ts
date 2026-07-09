@@ -35,6 +35,14 @@ function handleServiceError(error: unknown): ActionResult<never> {
   };
 }
 
+function emptyToNull(value: FormDataEntryValue | null) {
+  if (value === null || value === '') {
+    return null;
+  }
+
+  return value;
+}
+
 function parseCreateSalePayload(formData: FormData) {
   const itemsRaw = formData.get('items_json');
 
@@ -48,12 +56,29 @@ function parseCreateSalePayload(formData: FormData) {
     }
   }
 
+  const paymentMethod = formData.get('payment_method');
+  const cardPaymentType = emptyToNull(formData.get('card_payment_type'));
+  const financingRaw = emptyToNull(
+    formData.get('financing_installments_count')
+  );
+
+  const isCard = paymentMethod === 'card';
+  const isCardCredit = isCard && cardPaymentType === 'credit';
+  const isCashPix = paymentMethod === 'cash' || paymentMethod === 'pix';
+  const isInstallmentCashPix = isCashPix && financingRaw !== null;
+
   return {
     customer_id: formData.get('customer_id'),
     discount: formData.get('discount') ?? '0',
-    payment_method: formData.get('payment_method'),
-    card_payment_type: formData.get('card_payment_type'),
-    installments_count: formData.get('installments_count'),
+    payment_method: paymentMethod,
+    card_payment_type: isCard ? cardPaymentType : null,
+    installments_count: isCardCredit
+      ? emptyToNull(formData.get('installments_count'))
+      : null,
+    down_payment: isInstallmentCashPix
+      ? (formData.get('down_payment') ?? '0')
+      : '0',
+    financing_installments_count: isInstallmentCashPix ? financingRaw : null,
     items,
   };
 }
@@ -87,11 +112,23 @@ export async function createSaleAction(
   const parsed = createSaleSchema.safeParse(parseCreateSalePayload(formData));
 
   if (!parsed.success) {
+    if (process.env.NODE_ENV === 'development') {
+      console.error(
+        '[createSaleAction] Validação falhou:',
+        parsed.error.flatten()
+      );
+    }
+
+    const fieldErrors = mapFieldErrors(parsed.error.flatten().fieldErrors);
+    const firstFieldError = Object.values(fieldErrors).flat()[0];
+
     return {
       success: false,
-      fieldErrors: mapFieldErrors(parsed.error.flatten().fieldErrors),
-      error: parsed.error.issues.find((issue) => issue.path.length === 0)
-        ?.message,
+      fieldErrors,
+      error:
+        parsed.error.issues.find((issue) => issue.path.length === 0)?.message ??
+        firstFieldError ??
+        'Revise os campos da venda e tente novamente.',
     };
   }
 

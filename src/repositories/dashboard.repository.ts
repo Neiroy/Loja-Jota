@@ -28,6 +28,7 @@ type RecentSaleQueryRow = {
   payment_status: RecentSaleQueryRowPaymentStatus;
   card_payment_type: import('@/types/database.types').CardPaymentType | null;
   installments_count: number | null;
+  financing_installments_count: number | null;
   customers: { name: string } | { name: string }[] | null;
 };
 
@@ -137,6 +138,7 @@ export async function findRecentSales(storeId: string, limit: number) {
         payment_status,
         card_payment_type,
         installments_count,
+        financing_installments_count,
         customers ( name )
       `
     )
@@ -172,6 +174,7 @@ export function mapRecentSaleRow(row: RecentSaleQueryRow) {
     payment_status: row.payment_status,
     card_payment_type: row.card_payment_type,
     installments_count: row.installments_count,
+    financing_installments_count: row.financing_installments_count,
   };
 }
 

@@ -15,6 +15,8 @@ type ReceivableListQueryRow = {
   status: ReceivableListRow['status'];
   paid_at: string | null;
   payment_method: ReceivableListRow['payment_method'];
+  installment_number: number;
+  installments_total: number;
   created_at: string;
   updated_at: string;
   customers: { name: string } | { name: string }[] | null;
@@ -34,9 +36,14 @@ type ReceivableDetailQueryRow = {
   paid_at: string | null;
   payment_method: ReceivableListRow['payment_method'];
   notes: string | null;
+  installment_number: number;
+  installments_total: number;
   created_at: string;
   updated_at: string;
-  customers: { name: string } | { name: string }[] | null;
+  customers:
+    | { name: string; phone: string | null }
+    | { name: string; phone: string | null }[]
+    | null;
   sales:
     | {
         sale_date: string;
@@ -72,6 +79,8 @@ function mapReceivableListRow(row: ReceivableListQueryRow): ReceivableListRow {
     status: row.status,
     paid_at: row.paid_at,
     payment_method: row.payment_method,
+    installment_number: row.installment_number,
+    installments_total: row.installments_total,
     created_at: row.created_at,
     updated_at: row.updated_at,
     customer_name: customer?.name ?? 'Cliente',
@@ -97,9 +106,12 @@ function mapReceivableDetail(row: ReceivableDetailQueryRow): ReceivableDetail {
     created_at: row.created_at,
     updated_at: row.updated_at,
     customer_name: customer?.name ?? 'Cliente',
+    customer_phone: customer?.phone ?? null,
     sale_date: sale?.sale_date ?? '',
     sale_total: Number(sale?.total ?? 0),
     sale_payment_status: sale?.payment_status ?? 'pending',
+    installment_number: row.installment_number,
+    installments_total: row.installments_total,
   };
 }
 
@@ -134,6 +146,8 @@ export async function findAll(
         status,
         paid_at,
         payment_method,
+        installment_number,
+        installments_total,
         created_at,
         updated_at,
         customers ( name ),
@@ -184,9 +198,11 @@ export async function findByIdWithDetails(storeId: string, id: string) {
         paid_at,
         payment_method,
         notes,
+        installment_number,
+        installments_total,
         created_at,
         updated_at,
-        customers ( name ),
+        customers ( name, phone ),
         sales ( sale_date, total, payment_status )
       `
     )

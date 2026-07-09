@@ -21,7 +21,7 @@ export function DashboardSection({
     <section
       className={cn(
         surfaceCardClassName,
-        'flex h-full min-h-[20rem] min-w-0 flex-col overflow-hidden'
+        'flex h-full min-h-[20rem] min-w-0 flex-col'
       )}
     >
       <div className="flex items-center justify-between gap-4 border-b border-stone-200/60 px-6 py-5">

@@ -7,7 +7,11 @@ export type PaymentMethod = 'cash' | 'pix' | 'card' | 'credit_30_days';
 
 export type CardPaymentType = 'debit' | 'credit';
 
-export type SalePaymentStatus = 'paid' | 'pending' | 'cancelled';
+export type SalePaymentStatus =
+  | 'paid'
+  | 'pending'
+  | 'partially_paid'
+  | 'cancelled';
 
 export type ReceivableStatus = 'open' | 'paid' | 'overdue' | 'cancelled';
 
@@ -75,6 +79,8 @@ export type Sale = {
   payment_status: SalePaymentStatus;
   card_payment_type: CardPaymentType | null;
   installments_count: number | null;
+  down_payment: number;
+  financing_installments_count: number | null;
   created_at: string;
   updated_at: string;
 };
@@ -101,6 +107,8 @@ export type Receivable = {
   paid_at: string | null;
   payment_method: ReceivableSettlementMethod | null;
   notes: string | null;
+  installment_number: number;
+  installments_total: number;
   created_at: string;
   updated_at: string;
 };

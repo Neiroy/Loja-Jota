@@ -22,6 +22,8 @@ export type ReceivableListRow = {
   customer_name: string;
   sale_date: string;
   sale_total: number;
+  installment_number: number;
+  installments_total: number;
 };
 
 export type ReceivableDetail = {
@@ -39,7 +41,10 @@ export type ReceivableDetail = {
   created_at: string;
   updated_at: string;
   customer_name: string;
+  customer_phone: string | null;
   sale_date: string;
   sale_total: number;
   sale_payment_status: import('@/types/database.types').SalePaymentStatus;
+  installment_number: number;
+  installments_total: number;
 };

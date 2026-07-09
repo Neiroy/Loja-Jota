@@ -18,6 +18,14 @@ const columns: DataTableColumn<ReceivableListRow>[] = [
     ),
   },
   {
+    key: 'installment',
+    header: 'Parcela',
+    cell: (receivable) =>
+      receivable.installments_total > 1
+        ? `${receivable.installment_number}/${receivable.installments_total}`
+        : 'Única',
+  },
+  {
     key: 'amount',
     header: 'Valor',
     cell: (receivable) => formatProductPrice(receivable.amount),

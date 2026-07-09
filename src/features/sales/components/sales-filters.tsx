@@ -35,7 +35,7 @@ const STATUS_FILTER_OPTIONS: Array<{
 }> = [
   { value: 'all', label: 'Todos' },
   { value: 'paid', label: 'Pagos' },
-  { value: 'pending', label: 'Pendentes' },
+  { value: 'pending', label: 'Pendentes / parciais' },
 ];
 
 function normalizeFilters(

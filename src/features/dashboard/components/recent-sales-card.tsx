@@ -30,6 +30,7 @@ const columns: DataTableColumn<RecentSaleRow>[] = [
         method={sale.payment_method}
         cardPaymentType={sale.card_payment_type}
         installmentsCount={sale.installments_count}
+        financingInstallmentsCount={sale.financing_installments_count}
       />
     ),
   },

@@ -15,7 +15,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { FormSection } from '@/components/shared/form-section';
 import {
-  ALLOWED_INSTALLMENT_COUNTS,
+  ALLOWED_CARD_INSTALLMENT_COUNTS,
+  ALLOWED_FINANCING_INSTALLMENT_COUNTS,
   type CardPaymentType,
   type CreateSaleItemInput,
   type PaymentMethod,
@@ -27,6 +28,8 @@ type SaleFormProps = {
   customers: Customer[];
   products: Product[];
 };
+
+type CashPixPaymentMode = 'cash' | 'installment';
 
 const PAYMENT_OPTIONS: PaymentMethod[] = [
   'cash',
@@ -40,11 +43,23 @@ const CARD_TYPE_OPTIONS: Array<{ value: CardPaymentType; label: string }> = [
   { value: 'credit', label: 'Crédito' },
 ];
 
+const CASH_PIX_MODE_OPTIONS: Array<{
+  value: CashPixPaymentMode;
+  label: string;
+}> = [
+  { value: 'cash', label: 'À vista' },
+  { value: 'installment', label: 'Parcelado' },
+];
+
 function createInitialItem(): CreateSaleItemInput {
   return {
     product_id: '',
     quantity: 1,
   };
+}
+
+function isCashOrPix(method: PaymentMethod) {
+  return method === 'cash' || method === 'pix';
 }
 
 export function SaleForm({ customers, products }: SaleFormProps) {
@@ -56,6 +71,12 @@ export function SaleForm({ customers, products }: SaleFormProps) {
   const [installmentsCount, setInstallmentsCount] = useState<number | null>(
     null
   );
+  const [cashPixPaymentMode, setCashPixPaymentMode] =
+    useState<CashPixPaymentMode>('cash');
+  const [downPaymentDisplay, setDownPaymentDisplay] = useState('');
+  const [financingInstallmentsCount, setFinancingInstallmentsCount] = useState<
+    number | null
+  >(null);
   const [items, setItems] = useState<CreateSaleItemInput[]>([
     createInitialItem(),
   ]);
@@ -63,6 +84,9 @@ export function SaleForm({ customers, products }: SaleFormProps) {
 
   const itemsJson = useMemo(() => JSON.stringify(items), [items]);
   const discountValue = parseCurrencyBRToNumber(discountDisplay);
+  const downPaymentValue = parseCurrencyBRToNumber(downPaymentDisplay);
+  const isInstallmentCashPix =
+    isCashOrPix(paymentMethod) && cashPixPaymentMode === 'installment';
 
   function handlePaymentMethodChange(method: PaymentMethod) {
     setPaymentMethod(method);
@@ -71,10 +95,31 @@ export function SaleForm({ customers, products }: SaleFormProps) {
       setCardPaymentType(null);
       setInstallmentsCount(null);
     }
+
+    if (!isCashOrPix(method)) {
+      setCashPixPaymentMode('cash');
+      setDownPaymentDisplay('');
+      setFinancingInstallmentsCount(null);
+    }
+  }
+
+  function handleCashPixPaymentModeChange(mode: CashPixPaymentMode) {
+    setCashPixPaymentMode(mode);
+    setInstallmentsCount(null);
+
+    if (mode === 'cash') {
+      setDownPaymentDisplay('');
+      setFinancingInstallmentsCount(null);
+      return;
+    }
+
+    setFinancingInstallmentsCount((current) => current ?? 2);
   }
 
   function handleCardPaymentTypeChange(type: CardPaymentType) {
     setCardPaymentType(type);
+    setFinancingInstallmentsCount(null);
+    setDownPaymentDisplay('');
 
     if (type === 'debit') {
       setInstallmentsCount(null);
@@ -91,17 +136,11 @@ export function SaleForm({ customers, products }: SaleFormProps) {
     >
       <input type="hidden" name="items_json" value={itemsJson} />
       <input type="hidden" name="discount" value={discountValue} />
+      {isInstallmentCashPix ? (
+        <input type="hidden" name="down_payment" value={downPaymentValue} />
+      ) : null}
       {paymentMethod === 'card' && cardPaymentType ? (
         <input type="hidden" name="card_payment_type" value={cardPaymentType} />
-      ) : null}
-      {paymentMethod === 'card' &&
-      cardPaymentType === 'credit' &&
-      installmentsCount != null ? (
-        <input
-          type="hidden"
-          name="installments_count"
-          value={installmentsCount}
-        />
       ) : null}
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_22rem] xl:items-start">
@@ -203,6 +242,100 @@ export function SaleForm({ customers, products }: SaleFormProps) {
               ) : null}
             </div>
 
+            {isCashOrPix(paymentMethod) ? (
+              <div className="space-y-4 rounded-xl border border-stone-200/70 bg-stone-50/50 p-4">
+                <div className="space-y-3">
+                  <Label>Modalidade *</Label>
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    {CASH_PIX_MODE_OPTIONS.map((option) => (
+                      <label
+                        key={option.value}
+                        className={cn(
+                          'flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 text-sm transition-colors',
+                          cashPixPaymentMode === option.value
+                            ? 'border-stone-900 bg-stone-900 text-white shadow-sm'
+                            : 'border-stone-200/70 bg-white text-stone-700 hover:bg-stone-50'
+                        )}
+                      >
+                        <input
+                          type="radio"
+                          name="cash_pix_payment_mode_ui"
+                          value={option.value}
+                          checked={cashPixPaymentMode === option.value}
+                          onChange={() =>
+                            handleCashPixPaymentModeChange(option.value)
+                          }
+                          disabled={isPending}
+                          className="size-4 accent-stone-900"
+                        />
+                        <span>{option.label}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {isInstallmentCashPix ? (
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="down_payment_display">
+                        Entrada (opcional)
+                      </Label>
+                      <Input
+                        id="down_payment_display"
+                        inputMode="numeric"
+                        value={downPaymentDisplay}
+                        onChange={(event) =>
+                          setDownPaymentDisplay(
+                            maskCurrencyBR(event.target.value)
+                          )
+                        }
+                        placeholder="R$ 0,00"
+                        disabled={isPending}
+                      />
+                      {state?.fieldErrors?.down_payment ? (
+                        <p className="text-destructive text-sm">
+                          {state.fieldErrors.down_payment[0]}
+                        </p>
+                      ) : null}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="financing_installments_count">
+                        Parcelamento *
+                      </Label>
+                      <select
+                        id="financing_installments_count"
+                        name="financing_installments_count"
+                        value={financingInstallmentsCount ?? ''}
+                        onChange={(event) =>
+                          setFinancingInstallmentsCount(
+                            Number(event.target.value)
+                          )
+                        }
+                        disabled={isPending}
+                        required
+                        className={fieldControlClassName}
+                      >
+                        <option value="" disabled>
+                          Selecione as parcelas
+                        </option>
+                        {ALLOWED_FINANCING_INSTALLMENT_COUNTS.map((count) => (
+                          <option key={count} value={count}>
+                            {count}x
+                          </option>
+                        ))}
+                      </select>
+                      {state?.fieldErrors?.financing_installments_count ? (
+                        <p className="text-destructive text-sm">
+                          {state.fieldErrors.financing_installments_count[0]}
+                        </p>
+                      ) : null}
+                    </div>
+                  </>
+                ) : null}
+              </div>
+            ) : null}
+
             {paymentMethod === 'card' ? (
               <div className="space-y-4 rounded-xl border border-stone-200/70 bg-stone-50/50 p-4">
                 <div className="space-y-3">
@@ -245,6 +378,7 @@ export function SaleForm({ customers, products }: SaleFormProps) {
                     <Label htmlFor="installments_count">Parcelamento *</Label>
                     <select
                       id="installments_count"
+                      name="installments_count"
                       value={installmentsCount ?? ''}
                       onChange={(event) =>
                         setInstallmentsCount(Number(event.target.value))
@@ -256,7 +390,7 @@ export function SaleForm({ customers, products }: SaleFormProps) {
                       <option value="" disabled>
                         Selecione as parcelas
                       </option>
-                      {ALLOWED_INSTALLMENT_COUNTS.map((count) => (
+                      {ALLOWED_CARD_INSTALLMENT_COUNTS.map((count) => (
                         <option key={count} value={count}>
                           {count}x
                         </option>
@@ -282,12 +416,30 @@ export function SaleForm({ customers, products }: SaleFormProps) {
             paymentMethod={paymentMethod}
             cardPaymentType={cardPaymentType}
             installmentsCount={installmentsCount}
+            financingInstallmentsCount={
+              isInstallmentCashPix ? financingInstallmentsCount : null
+            }
+            downPayment={isInstallmentCashPix ? downPaymentValue : 0}
           />
         </div>
       </div>
 
       {state?.error ? (
-        <p className="text-destructive text-sm">{state.error}</p>
+        <div
+          role="alert"
+          className="border-destructive/30 bg-destructive/5 text-destructive rounded-xl border px-4 py-3 text-sm"
+        >
+          {state.error}
+        </div>
+      ) : null}
+
+      {state?.fieldErrors && !state.error ? (
+        <div
+          role="alert"
+          className="border-destructive/30 bg-destructive/5 text-destructive rounded-xl border px-4 py-3 text-sm"
+        >
+          Revise os campos destacados abaixo e tente novamente.
+        </div>
       ) : null}
 
       <div className="flex flex-col-reverse gap-3 border-t border-stone-200/60 pt-6 sm:flex-row sm:justify-start">

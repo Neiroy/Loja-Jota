@@ -1,5 +1,5 @@
 import { formatProductPrice } from '@/features/products/utils/format-product-price';
-import { getSalePaymentSummaryLabel } from '@/features/sales/utils/payment-method-labels';
+import { getSalePaymentSummaryLines } from '@/features/sales/utils/payment-method-labels';
 import { surfaceCardClassName } from '@/lib/surface';
 import { cn } from '@/lib/utils';
 import type {
@@ -16,6 +16,8 @@ type SaleSummaryProps = {
   paymentMethod: PaymentMethod;
   cardPaymentType: CardPaymentType | null;
   installmentsCount: number | null;
+  financingInstallmentsCount: number | null;
+  downPayment: number;
 };
 
 export function SaleSummary({
@@ -25,6 +27,8 @@ export function SaleSummary({
   paymentMethod,
   cardPaymentType,
   installmentsCount,
+  financingInstallmentsCount,
+  downPayment,
 }: SaleSummaryProps) {
   const productMap = new Map(products.map((product) => [product.id, product]));
 
@@ -40,11 +44,13 @@ export function SaleSummary({
 
   const safeDiscount = Number.isFinite(discount) && discount > 0 ? discount : 0;
   const total = Math.max(subtotal - safeDiscount, 0);
-  const paymentSummary = getSalePaymentSummaryLabel(
+  const paymentSummaryLines = getSalePaymentSummaryLines(
     {
       payment_method: paymentMethod,
       card_payment_type: cardPaymentType,
       installments_count: installmentsCount,
+      financing_installments_count: financingInstallmentsCount,
+      down_payment: downPayment,
     },
     total
   );
@@ -76,8 +82,12 @@ export function SaleSummary({
           <span>Total estimado</span>
           <span>{formatProductPrice(total)}</span>
         </div>
-        {paymentSummary ? (
-          <p className="text-sm text-stone-600">{paymentSummary}</p>
+        {paymentSummaryLines.length > 0 ? (
+          <div className="space-y-1 text-sm text-stone-600">
+            {paymentSummaryLines.map((line) => (
+              <p key={line}>{line}</p>
+            ))}
+          </div>
         ) : null}
       </div>
     </aside>

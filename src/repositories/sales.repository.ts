@@ -4,6 +4,7 @@ import type {
   CreateSaleRpcInput,
   SaleDetail,
   SaleListRow,
+  SaleReceivableSummary,
 } from '@/types/sale.types';
 
 type SaleListQueryRow = {
@@ -17,9 +18,20 @@ type SaleListQueryRow = {
   payment_status: SaleListRow['payment_status'];
   card_payment_type: SaleListRow['card_payment_type'];
   installments_count: SaleListRow['installments_count'];
+  down_payment: number | string;
+  financing_installments_count: SaleListRow['financing_installments_count'];
   created_at: string;
   updated_at: string;
   customers: { name: string } | { name: string }[] | null;
+};
+
+type SaleReceivableQueryRow = {
+  id: string;
+  amount: number | string;
+  due_date: string;
+  status: SaleReceivableSummary['status'];
+  installment_number: number;
+  installments_total: number;
 };
 
 type SaleDetailQueryRow = {
@@ -33,6 +45,8 @@ type SaleDetailQueryRow = {
   payment_status: SaleDetail['payment_status'];
   card_payment_type: SaleDetail['card_payment_type'];
   installments_count: SaleDetail['installments_count'];
+  down_payment: number | string;
+  financing_installments_count: SaleDetail['financing_installments_count'];
   created_at: string;
   updated_at: string;
   customers: { name: string } | { name: string }[] | null;
@@ -59,20 +73,7 @@ type SaleDetailQueryRow = {
         }[]
       | null;
   }>;
-  receivables:
-    | {
-        id: string;
-        amount: number | string;
-        due_date: string;
-        status: NonNullable<SaleDetail['receivable']>['status'];
-      }
-    | {
-        id: string;
-        amount: number | string;
-        due_date: string;
-        status: NonNullable<SaleDetail['receivable']>['status'];
-      }[]
-    | null;
+  receivables: SaleReceivableQueryRow[] | null;
 };
 
 function unwrapRelation<T>(value: T | T[] | null | undefined): T | null {
@@ -81,6 +82,19 @@ function unwrapRelation<T>(value: T | T[] | null | undefined): T | null {
   }
 
   return Array.isArray(value) ? (value[0] ?? null) : value;
+}
+
+function mapReceivableSummary(
+  row: SaleReceivableQueryRow
+): SaleReceivableSummary {
+  return {
+    id: row.id,
+    amount: Number(row.amount),
+    due_date: row.due_date,
+    status: row.status,
+    installment_number: row.installment_number,
+    installments_total: row.installments_total,
+  };
 }
 
 function mapSaleListRow(row: SaleListQueryRow): SaleListRow {
@@ -97,6 +111,8 @@ function mapSaleListRow(row: SaleListQueryRow): SaleListRow {
     payment_status: row.payment_status,
     card_payment_type: row.card_payment_type,
     installments_count: row.installments_count,
+    down_payment: Number(row.down_payment),
+    financing_installments_count: row.financing_installments_count,
     created_at: row.created_at,
     updated_at: row.updated_at,
     customer_name: customer?.name ?? 'Cliente',
@@ -105,7 +121,9 @@ function mapSaleListRow(row: SaleListQueryRow): SaleListRow {
 
 function mapSaleDetail(row: SaleDetailQueryRow): SaleDetail {
   const customer = unwrapRelation(row.customers);
-  const receivable = unwrapRelation(row.receivables);
+  const receivables = [...(row.receivables ?? [])].sort(
+    (left, right) => left.installment_number - right.installment_number
+  );
 
   return {
     id: row.id,
@@ -118,6 +136,8 @@ function mapSaleDetail(row: SaleDetailQueryRow): SaleDetail {
     payment_status: row.payment_status,
     card_payment_type: row.card_payment_type,
     installments_count: row.installments_count,
+    down_payment: Number(row.down_payment),
+    financing_installments_count: row.financing_installments_count,
     created_at: row.created_at,
     updated_at: row.updated_at,
     customer_name: customer?.name ?? 'Cliente',
@@ -138,14 +158,7 @@ function mapSaleDetail(row: SaleDetailQueryRow): SaleDetail {
         product_color: product?.color ?? null,
       };
     }),
-    receivable: receivable
-      ? {
-          id: receivable.id,
-          amount: Number(receivable.amount),
-          due_date: receivable.due_date,
-          status: receivable.status,
-        }
-      : null,
+    receivables: receivables.map(mapReceivableSummary),
   };
 }
 
@@ -173,6 +186,8 @@ export async function findAll(
         payment_status,
         card_payment_type,
         installments_count,
+        down_payment,
+        financing_installments_count,
         created_at,
         updated_at,
         customers ( name )
@@ -187,7 +202,7 @@ export async function findAll(
   }
 
   if (payment_status === 'pending') {
-    query = query.eq('payment_status', 'pending');
+    query = query.in('payment_status', ['pending', 'partially_paid']);
   }
 
   if (payment_method) {
@@ -223,6 +238,8 @@ export async function findByIdWithDetails(storeId: string, id: string) {
         payment_status,
         card_payment_type,
         installments_count,
+        down_payment,
+        financing_installments_count,
         created_at,
         updated_at,
         customers ( name ),
@@ -240,7 +257,9 @@ export async function findByIdWithDetails(storeId: string, id: string) {
           id,
           amount,
           due_date,
-          status
+          status,
+          installment_number,
+          installments_total
         )
       `
     )
@@ -259,6 +278,8 @@ export async function createSaleWithItems(input: CreateSaleRpcInput) {
     p_items: input.items,
     p_card_payment_type: input.card_payment_type,
     p_installments_count: input.installments_count,
+    p_down_payment: input.down_payment,
+    p_financing_installments_count: input.financing_installments_count,
   });
 }
 

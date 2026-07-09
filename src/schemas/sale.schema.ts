@@ -9,15 +9,35 @@ export const paymentMethodSchema = z.enum([
 
 export const cardPaymentTypeSchema = z.enum(['debit', 'credit']);
 
-export const ALLOWED_INSTALLMENT_COUNTS = [1, 2, 3, 4, 5, 6, 10, 12] as const;
+export const ALLOWED_CARD_INSTALLMENT_COUNTS = [
+  1, 2, 3, 4, 5, 6, 10, 12,
+] as const;
 
-export const installmentsCountSchema = z.coerce
+export const ALLOWED_FINANCING_INSTALLMENT_COUNTS = [
+  2, 3, 4, 5, 6, 10, 12,
+] as const;
+
+/** @deprecated Use ALLOWED_CARD_INSTALLMENT_COUNTS */
+export const ALLOWED_INSTALLMENT_COUNTS = ALLOWED_CARD_INSTALLMENT_COUNTS;
+
+export const cardInstallmentsCountSchema = z.coerce
   .number({ error: 'Parcelamento inválido.' })
   .int('Parcelamento deve ser um número inteiro.')
   .refine(
     (value) =>
-      ALLOWED_INSTALLMENT_COUNTS.includes(
-        value as (typeof ALLOWED_INSTALLMENT_COUNTS)[number]
+      ALLOWED_CARD_INSTALLMENT_COUNTS.includes(
+        value as (typeof ALLOWED_CARD_INSTALLMENT_COUNTS)[number]
+      ),
+    'Quantidade de parcelas inválida.'
+  );
+
+export const financingInstallmentsCountSchema = z.coerce
+  .number({ error: 'Parcelamento inválido.' })
+  .int('Parcelamento deve ser um número inteiro.')
+  .refine(
+    (value) =>
+      ALLOWED_FINANCING_INSTALLMENT_COUNTS.includes(
+        value as (typeof ALLOWED_FINANCING_INSTALLMENT_COUNTS)[number]
       ),
     'Quantidade de parcelas inválida.'
   );
@@ -25,6 +45,21 @@ export const installmentsCountSchema = z.coerce
 export const salePaymentStatusFilterSchema = z.enum(['all', 'paid', 'pending']);
 
 export const saleIdSchema = z.string().uuid('Identificador inválido.');
+
+function optionalNullableCount() {
+  return z.preprocess(
+    (value) => {
+      if (value === '' || value === undefined || value === null) {
+        return null;
+      }
+
+      return value;
+    },
+    z.nullable(
+      z.coerce.number().int('Parcelamento deve ser um número inteiro.')
+    )
+  );
+}
 
 export const createSaleItemSchema = z.object({
   product_id: z.string().uuid('Produto inválido.'),
@@ -49,16 +84,13 @@ export const createSaleSchema = z
       .transform((value) =>
         value === '' || value === undefined ? null : value
       ),
-    installments_count: z
-      .union([z.coerce.number(), z.literal(''), z.null()])
-      .optional()
-      .transform((value) => {
-        if (value === '' || value === undefined || value === null) {
-          return null;
-        }
-
-        return Number(value);
-      }),
+    installments_count: optionalNullableCount(),
+    down_payment: z.coerce
+      .number({ error: 'Entrada inválida.' })
+      .min(0, 'Entrada deve ser maior ou igual a zero.')
+      .default(0)
+      .transform((value) => Math.round(value * 100) / 100),
+    financing_installments_count: optionalNullableCount(),
     items: z
       .array(createSaleItemSchema)
       .min(1, 'A venda deve ter pelo menos um item.'),
@@ -76,7 +108,7 @@ export const createSaleSchema = z
       });
     }
 
-    if (data.payment_method !== 'card') {
+    if (data.payment_method === 'credit_30_days') {
       if (data.card_payment_type !== null) {
         ctx.addIssue({
           code: 'custom',
@@ -88,28 +120,91 @@ export const createSaleSchema = z
       if (data.installments_count !== null) {
         ctx.addIssue({
           code: 'custom',
-          message: 'Parcelamento só é permitido para cartão crédito.',
+          message: 'Parcelamento de cartão só é permitido para cartão crédito.',
           path: ['installments_count'],
         });
       }
 
-      return;
-    }
-
-    if (data.card_payment_type === null) {
-      ctx.addIssue({
-        code: 'custom',
-        message: 'Selecione o tipo do cartão.',
-        path: ['card_payment_type'],
-      });
-      return;
-    }
-
-    if (data.card_payment_type === 'debit') {
-      if (data.installments_count !== null) {
+      if (data.down_payment !== 0) {
         ctx.addIssue({
           code: 'custom',
-          message: 'Cartão débito não permite parcelamento.',
+          message:
+            'Entrada só é permitida em vendas parceladas com Pix ou Dinheiro.',
+          path: ['down_payment'],
+        });
+      }
+
+      if (data.financing_installments_count !== null) {
+        ctx.addIssue({
+          code: 'custom',
+          message:
+            'Parcelamento só é permitido para Pix, Dinheiro ou cartão crédito.',
+          path: ['financing_installments_count'],
+        });
+      }
+
+      return;
+    }
+
+    if (data.payment_method === 'card') {
+      if (data.down_payment !== 0) {
+        ctx.addIssue({
+          code: 'custom',
+          message:
+            'Entrada só é permitida em vendas parceladas com Pix ou Dinheiro.',
+          path: ['down_payment'],
+        });
+      }
+
+      if (data.financing_installments_count !== null) {
+        ctx.addIssue({
+          code: 'custom',
+          message:
+            'Parcelamento financiado só é permitido para Pix ou Dinheiro.',
+          path: ['financing_installments_count'],
+        });
+      }
+
+      if (data.card_payment_type === null) {
+        ctx.addIssue({
+          code: 'custom',
+          message: 'Selecione o tipo do cartão.',
+          path: ['card_payment_type'],
+        });
+        return;
+      }
+
+      if (data.card_payment_type === 'debit') {
+        if (data.installments_count !== null) {
+          ctx.addIssue({
+            code: 'custom',
+            message: 'Cartão débito não permite parcelamento.',
+            path: ['installments_count'],
+          });
+        }
+
+        return;
+      }
+
+      if (data.installments_count === null) {
+        ctx.addIssue({
+          code: 'custom',
+          message: 'Selecione o parcelamento do cartão crédito.',
+          path: ['installments_count'],
+        });
+        return;
+      }
+
+      const installmentsResult = cardInstallmentsCountSchema.safeParse(
+        data.installments_count
+      );
+
+      if (!installmentsResult.success) {
+        ctx.addIssue({
+          code: 'custom',
+          message:
+            installmentsResult.error.issues[0]?.message ??
+            'Quantidade de parcelas inválida.',
           path: ['installments_count'],
         });
       }
@@ -117,26 +212,49 @@ export const createSaleSchema = z
       return;
     }
 
-    if (data.installments_count === null) {
+    if (data.card_payment_type !== null) {
       ctx.addIssue({
         code: 'custom',
-        message: 'Selecione o parcelamento do cartão crédito.',
+        message: 'Tipo do cartão só é permitido para pagamento com cartão.',
+        path: ['card_payment_type'],
+      });
+    }
+
+    if (data.installments_count !== null) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Parcelamento de cartão só é permitido para cartão crédito.',
         path: ['installments_count'],
       });
+    }
+
+    if (data.payment_method !== 'cash' && data.payment_method !== 'pix') {
       return;
     }
 
-    const installmentsResult = installmentsCountSchema.safeParse(
-      data.installments_count
+    if (data.financing_installments_count === null) {
+      if (data.down_payment !== 0) {
+        ctx.addIssue({
+          code: 'custom',
+          message: 'Entrada só é permitida em vendas parceladas.',
+          path: ['down_payment'],
+        });
+      }
+
+      return;
+    }
+
+    const financingResult = financingInstallmentsCountSchema.safeParse(
+      data.financing_installments_count
     );
 
-    if (!installmentsResult.success) {
+    if (!financingResult.success) {
       ctx.addIssue({
         code: 'custom',
         message:
-          installmentsResult.error.issues[0]?.message ??
+          financingResult.error.issues[0]?.message ??
           'Quantidade de parcelas inválida.',
-        path: ['installments_count'],
+        path: ['financing_installments_count'],
       });
     }
   });

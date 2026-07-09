@@ -46,9 +46,7 @@ export function DataTable<T>({
   }
 
   return (
-    <div
-      className={cn(surfaceCardClassName, 'min-w-0 overflow-hidden', className)}
-    >
+    <div className={cn(surfaceCardClassName, 'min-w-0', className)}>
       <Table>
         <TableHeader>
           <TableRow className="hover:bg-transparent">

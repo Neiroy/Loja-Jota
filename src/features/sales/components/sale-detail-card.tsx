@@ -43,6 +43,7 @@ export function SaleDetailCard({ sale }: SaleDetailCardProps) {
               method={sale.payment_method}
               cardPaymentType={sale.card_payment_type}
               installmentsCount={sale.installments_count}
+              financingInstallmentsCount={sale.financing_installments_count}
             />
           }
         />
@@ -50,6 +51,12 @@ export function SaleDetailCard({ sale }: SaleDetailCardProps) {
           label="Status do pagamento"
           value={<SalePaymentStatusBadge status={sale.payment_status} />}
         />
+        {sale.down_payment > 0 ? (
+          <DetailField
+            label="Entrada"
+            value={formatProductPrice(sale.down_payment)}
+          />
+        ) : null}
         <DetailField
           label="Subtotal"
           value={formatProductPrice(sale.subtotal)}

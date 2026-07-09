@@ -48,6 +48,10 @@ function mapRpcErrorMessage(message?: string): string {
     'Quantidade de parcelas é obrigatória para cartão crédito.',
     'Quantidade de parcelas inválida.',
     'Campos de cartão só são permitidos quando a forma de pagamento é cartão.',
+    'Entrada deve ser maior ou igual a zero.',
+    'Entrada não pode ser maior que o total da venda.',
+    'Entrada e parcelamento só são permitidos para Dinheiro ou Pix.',
+    'Entrada só é permitida em vendas parceladas com Dinheiro ou Pix.',
   ];
 
   if (knownMessages.some((known) => message.includes(known))) {
@@ -75,6 +79,7 @@ function mapCancelRpcErrorMessage(message?: string): string {
     'Venda não encontrada.',
     'Venda já está cancelada.',
     'Não é possível cancelar venda com fiado já quitado.',
+    'Não é possível cancelar venda com parcela(s) já quitada(s).',
     'Produto vinculado à venda não foi encontrado.',
   ];
 
@@ -152,6 +157,8 @@ export async function create(input: CreateSaleInput): Promise<string> {
     payment_method: parsed.data.payment_method,
     card_payment_type: parsed.data.card_payment_type,
     installments_count: parsed.data.installments_count,
+    down_payment: parsed.data.down_payment,
+    financing_installments_count: parsed.data.financing_installments_count,
     items: parsed.data.items,
   });
 

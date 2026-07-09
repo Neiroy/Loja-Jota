@@ -12,6 +12,11 @@ export type SalePaymentDisplay = {
   payment_method: PaymentMethod;
   card_payment_type?: CardPaymentType | null;
   installments_count?: number | null;
+  financing_installments_count?: number | null;
+};
+
+export type SalePaymentSummaryInput = SalePaymentDisplay & {
+  down_payment?: number;
 };
 
 export function getPaymentMethodLabel(method: PaymentMethod) {
@@ -34,26 +39,76 @@ export function getSalePaymentLabel(payment: SalePaymentDisplay): string {
     return PAYMENT_METHOD_LABELS.card;
   }
 
+  if (
+    (payment.payment_method === 'cash' || payment.payment_method === 'pix') &&
+    payment.financing_installments_count != null
+  ) {
+    const methodLabel = PAYMENT_METHOD_LABELS[payment.payment_method];
+
+    return `${methodLabel} parcelado ${payment.financing_installments_count}x`;
+  }
+
   return PAYMENT_METHOD_LABELS[payment.payment_method];
 }
 
+export function getSalePaymentSummaryLines(
+  payment: SalePaymentSummaryInput,
+  total: number
+): string[] {
+  const lines: string[] = [];
+
+  if (payment.payment_method === 'card' && payment.card_payment_type) {
+    if (payment.card_payment_type === 'debit') {
+      lines.push('Cartão débito');
+      return lines;
+    }
+
+    if (payment.installments_count != null && payment.installments_count > 0) {
+      const installmentValue = total / payment.installments_count;
+      lines.push(
+        `Cartão crédito em ${payment.installments_count}x de ${formatProductPrice(installmentValue)}`
+      );
+    }
+
+    return lines;
+  }
+
+  if (
+    (payment.payment_method === 'cash' || payment.payment_method === 'pix') &&
+    payment.financing_installments_count != null
+  ) {
+    const methodLabel = payment.payment_method === 'pix' ? 'Pix' : 'Dinheiro';
+    const downPayment =
+      payment.down_payment != null && payment.down_payment > 0
+        ? payment.down_payment
+        : 0;
+    const financedAmount = Math.max(total - downPayment, 0);
+
+    if (financedAmount > 0) {
+      const installmentValue =
+        financedAmount / payment.financing_installments_count;
+
+      lines.push(
+        `${methodLabel} parcelado em ${payment.financing_installments_count}x de ${formatProductPrice(installmentValue)}`
+      );
+    }
+
+    if (downPayment > 0) {
+      lines.push(`Entrada: ${formatProductPrice(downPayment)}`);
+    }
+
+    return lines;
+  }
+
+  return lines;
+}
+
+/** @deprecated Use getSalePaymentSummaryLines */
 export function getSalePaymentSummaryLabel(
-  payment: SalePaymentDisplay,
+  payment: SalePaymentSummaryInput,
   total: number
 ): string | null {
-  if (payment.payment_method !== 'card' || !payment.card_payment_type) {
-    return null;
-  }
+  const lines = getSalePaymentSummaryLines(payment, total);
 
-  if (payment.card_payment_type === 'debit') {
-    return 'Cartão débito';
-  }
-
-  if (payment.installments_count != null && payment.installments_count > 0) {
-    const installmentValue = total / payment.installments_count;
-
-    return `Cartão crédito em ${payment.installments_count}x de ${formatProductPrice(installmentValue)}`;
-  }
-
-  return null;
+  return lines.length > 0 ? lines.join(' · ') : null;
 }

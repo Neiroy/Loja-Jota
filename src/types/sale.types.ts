@@ -9,6 +9,15 @@ export type {
 
 export type { Receivable } from '@/types/database.types';
 
+export type SaleReceivableSummary = {
+  id: string;
+  amount: number;
+  due_date: string;
+  status: import('@/types/database.types').ReceivableStatus;
+  installment_number: number;
+  installments_total: number;
+};
+
 export type SaleListRow = {
   id: string;
   customer_id: string;
@@ -20,6 +29,8 @@ export type SaleListRow = {
   payment_status: import('@/types/database.types').SalePaymentStatus;
   card_payment_type: import('@/types/database.types').CardPaymentType | null;
   installments_count: number | null;
+  down_payment: number;
+  financing_installments_count: number | null;
   created_at: string;
   updated_at: string;
   customer_name: string;
@@ -50,16 +61,13 @@ export type SaleDetail = {
   payment_status: import('@/types/database.types').SalePaymentStatus;
   card_payment_type: import('@/types/database.types').CardPaymentType | null;
   installments_count: number | null;
+  down_payment: number;
+  financing_installments_count: number | null;
   created_at: string;
   updated_at: string;
   customer_name: string;
   items: SaleItemWithProduct[];
-  receivable: {
-    id: string;
-    amount: number;
-    due_date: string;
-    status: import('@/types/database.types').ReceivableStatus;
-  } | null;
+  receivables: SaleReceivableSummary[];
 };
 
 export type CreateSaleRpcItem = {
@@ -73,5 +81,7 @@ export type CreateSaleRpcInput = {
   payment_method: import('@/types/database.types').PaymentMethod;
   card_payment_type: import('@/types/database.types').CardPaymentType | null;
   installments_count: number | null;
+  down_payment: number;
+  financing_installments_count: number | null;
   items: CreateSaleRpcItem[];
 };
