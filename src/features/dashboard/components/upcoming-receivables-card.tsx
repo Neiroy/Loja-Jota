@@ -15,7 +15,12 @@ const columns: DataTableColumn<UpcomingReceivableRow>[] = [
     key: 'customer_name',
     header: 'Cliente',
     cell: (receivable) => (
-      <span className="font-medium">{receivable.customer_name}</span>
+      <span
+        className="block max-w-[10rem] truncate font-medium sm:max-w-[14rem] lg:max-w-[12rem]"
+        title={receivable.customer_name}
+      >
+        {receivable.customer_name}
+      </span>
     ),
   },
   {

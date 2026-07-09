@@ -15,15 +15,25 @@ const statusLabels: Record<SalePaymentStatus, string> = {
   cancelled: 'Cancelado',
 };
 
+const compactStatusLabels: Record<SalePaymentStatus, string> = {
+  paid: 'Pago',
+  pending: 'Pendente',
+  partially_paid: 'Parcial',
+  cancelled: 'Cancelado',
+};
+
 type SalePaymentStatusBadgeProps = {
   status: SalePaymentStatus;
+  compact?: boolean;
   className?: string;
 };
 
 export function SalePaymentStatusBadge({
   status,
+  compact = false,
   className,
 }: SalePaymentStatusBadgeProps) {
+  const label = compact ? compactStatusLabels[status] : statusLabels[status];
   return (
     <span
       className={cn(
@@ -32,7 +42,7 @@ export function SalePaymentStatusBadge({
         className
       )}
     >
-      {statusLabels[status]}
+      {label}
     </span>
   );
 }

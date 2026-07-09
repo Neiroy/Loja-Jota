@@ -19,7 +19,14 @@ const columns: DataTableColumn<SaleListRow>[] = [
   {
     key: 'customer_name',
     header: 'Cliente',
-    cell: (sale) => <span className="font-medium">{sale.customer_name}</span>,
+    cell: (sale) => (
+      <span
+        className="block max-w-[10rem] truncate font-medium sm:max-w-[14rem] lg:max-w-[12rem]"
+        title={sale.customer_name}
+      >
+        {sale.customer_name}
+      </span>
+    ),
   },
   {
     key: 'total',
@@ -35,13 +42,16 @@ const columns: DataTableColumn<SaleListRow>[] = [
         cardPaymentType={sale.card_payment_type}
         installmentsCount={sale.installments_count}
         financingInstallmentsCount={sale.financing_installments_count}
+        compact
       />
     ),
   },
   {
     key: 'payment_status',
     header: 'Status',
-    cell: (sale) => <SalePaymentStatusBadge status={sale.payment_status} />,
+    cell: (sale) => (
+      <SalePaymentStatusBadge status={sale.payment_status} compact />
+    ),
   },
   {
     key: 'actions',

@@ -29,14 +29,28 @@ const stockLabels: Record<StockLevel, string> = {
 
 type ProductStockBadgeProps = {
   quantity: number;
+  compact?: boolean;
   className?: string;
+};
+
+const compactStockLabels: Record<StockLevel, string> = {
+  out: 'Zero',
+  low: 'Baixo',
+  ok: 'Em estoque',
 };
 
 export function ProductStockBadge({
   quantity,
+  compact = false,
   className,
 }: ProductStockBadgeProps) {
   const level = getStockLevel(quantity);
+
+  if (compact && level === 'ok') {
+    return null;
+  }
+
+  const label = compact ? compactStockLabels[level] : stockLabels[level];
 
   return (
     <span
@@ -46,7 +60,7 @@ export function ProductStockBadge({
         className
       )}
     >
-      {stockLabels[level]}
+      {label}
     </span>
   );
 }

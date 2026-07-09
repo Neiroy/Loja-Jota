@@ -17,9 +17,11 @@ const columns: DataTableColumn<Product>[] = [
     cell: (product) => (
       <span
         className={cn(
+          'block max-w-[10rem] truncate sm:max-w-[14rem] lg:max-w-[12rem]',
           'font-medium',
           product.is_active ? 'text-stone-900' : 'text-stone-500'
         )}
+        title={product.name}
       >
         {product.name}
       </span>
@@ -28,6 +30,7 @@ const columns: DataTableColumn<Product>[] = [
   {
     key: 'category',
     header: 'Categoria',
+    className: 'hidden md:table-cell',
     cell: (product) => (
       <span className={product.is_active ? undefined : 'text-stone-500'}>
         {product.category ?? '—'}
@@ -37,6 +40,7 @@ const columns: DataTableColumn<Product>[] = [
   {
     key: 'size',
     header: 'Tamanho',
+    className: 'hidden md:table-cell',
     cell: (product) => (
       <span className={product.is_active ? undefined : 'text-stone-500'}>
         {product.size ?? '—'}
@@ -46,6 +50,7 @@ const columns: DataTableColumn<Product>[] = [
   {
     key: 'color',
     header: 'Cor',
+    className: 'hidden md:table-cell',
     cell: (product) => (
       <span className={product.is_active ? undefined : 'text-stone-500'}>
         {product.color ?? '—'}
@@ -69,7 +74,7 @@ const columns: DataTableColumn<Product>[] = [
         <span className={product.is_active ? undefined : 'text-stone-500'}>
           {product.stock_quantity}
         </span>
-        <ProductStockBadge quantity={product.stock_quantity} />
+        <ProductStockBadge quantity={product.stock_quantity} compact />
       </div>
     ),
   },

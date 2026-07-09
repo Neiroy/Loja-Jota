@@ -51,6 +51,40 @@ export function getSalePaymentLabel(payment: SalePaymentDisplay): string {
   return PAYMENT_METHOD_LABELS[payment.payment_method];
 }
 
+export function getSalePaymentLabelCompact(
+  payment: SalePaymentDisplay
+): string {
+  if (payment.payment_method === 'card') {
+    if (payment.card_payment_type === 'debit') {
+      return 'Débito';
+    }
+
+    if (
+      payment.card_payment_type === 'credit' &&
+      payment.installments_count != null
+    ) {
+      return `Créd. ${payment.installments_count}x`;
+    }
+
+    return PAYMENT_METHOD_LABELS.card;
+  }
+
+  if (payment.payment_method === 'credit_30_days') {
+    return 'Fiado 30d';
+  }
+
+  if (
+    (payment.payment_method === 'cash' || payment.payment_method === 'pix') &&
+    payment.financing_installments_count != null
+  ) {
+    const methodLabel = PAYMENT_METHOD_LABELS[payment.payment_method];
+
+    return `${methodLabel} ${payment.financing_installments_count}x`;
+  }
+
+  return PAYMENT_METHOD_LABELS[payment.payment_method];
+}
+
 export function getSalePaymentSummaryLines(
   payment: SalePaymentSummaryInput,
   total: number

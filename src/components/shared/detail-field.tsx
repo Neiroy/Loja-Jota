@@ -13,7 +13,9 @@ export function DetailField({ label, value, className }: DetailFieldProps) {
         <p className="text-xs font-medium tracking-wide text-stone-500 uppercase">
           {label}
         </p>
-        <div className="text-sm text-stone-900">{value}</div>
+        <div className="min-w-0 text-sm break-words text-stone-900">
+          {value}
+        </div>
       </div>
     </div>
   );

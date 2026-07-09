@@ -27,9 +27,11 @@ const columns: DataTableColumn<Customer>[] = [
     cell: (customer) => (
       <span
         className={cn(
+          'block max-w-[10rem] truncate sm:max-w-[14rem] lg:max-w-[12rem]',
           'font-medium',
           customer.is_active ? 'text-stone-900' : 'text-stone-500'
         )}
+        title={customer.name}
       >
         {customer.name}
       </span>
@@ -39,7 +41,13 @@ const columns: DataTableColumn<Customer>[] = [
     key: 'phone',
     header: 'Telefone',
     cell: (customer) => (
-      <span className={customer.is_active ? undefined : 'text-stone-500'}>
+      <span
+        className={cn(
+          'block max-w-[9rem] truncate sm:max-w-[12rem]',
+          customer.is_active ? undefined : 'text-stone-500'
+        )}
+        title={customer.phone ?? undefined}
+      >
         {customer.phone ?? '—'}
       </span>
     ),

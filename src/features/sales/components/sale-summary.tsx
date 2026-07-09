@@ -56,7 +56,7 @@ export function SaleSummary({
   );
 
   return (
-    <aside className={cn(surfaceCardClassName, 'overflow-hidden')}>
+    <aside className={cn(surfaceCardClassName, 'min-w-0')}>
       <div className="border-b border-stone-200/60 bg-stone-50/50 px-6 py-5">
         <h3 className="text-lg font-semibold text-stone-900">
           Resumo estimado
@@ -83,7 +83,7 @@ export function SaleSummary({
           <span>{formatProductPrice(total)}</span>
         </div>
         {paymentSummaryLines.length > 0 ? (
-          <div className="space-y-1 text-sm text-stone-600">
+          <div className="space-y-1 text-sm break-words text-stone-600">
             {paymentSummaryLines.map((line) => (
               <p key={line}>{line}</p>
             ))}

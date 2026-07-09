@@ -1,4 +1,7 @@
-import { getSalePaymentLabel } from '@/features/sales/utils/payment-method-labels';
+import {
+  getSalePaymentLabel,
+  getSalePaymentLabelCompact,
+} from '@/features/sales/utils/payment-method-labels';
 import { cn } from '@/lib/utils';
 import type { CardPaymentType, PaymentMethod } from '@/schemas/sale.schema';
 
@@ -14,6 +17,7 @@ type PaymentMethodBadgeProps = {
   cardPaymentType?: CardPaymentType | null;
   installmentsCount?: number | null;
   financingInstallmentsCount?: number | null;
+  compact?: boolean;
   className?: string;
 };
 
@@ -22,14 +26,18 @@ export function PaymentMethodBadge({
   cardPaymentType = null,
   installmentsCount = null,
   financingInstallmentsCount = null,
+  compact = false,
   className,
 }: PaymentMethodBadgeProps) {
-  const label = getSalePaymentLabel({
+  const payment = {
     payment_method: method,
     card_payment_type: cardPaymentType,
     installments_count: installmentsCount,
     financing_installments_count: financingInstallmentsCount,
-  });
+  };
+  const label = compact
+    ? getSalePaymentLabelCompact(payment)
+    : getSalePaymentLabel(payment);
 
   return (
     <span
