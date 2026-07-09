@@ -1,19 +1,29 @@
 import { NextResponse } from 'next/server';
 
-import { createClient } from '@/lib/supabase/server';
+import { getSafeRedirectPath } from '@/lib/auth/get-safe-redirect-path';
+import { ensureValidSessionOrSignOut } from '@/lib/auth/ensure-valid-session';
 import { DEFAULT_AUTHENTICATED_ROUTE } from '@/lib/constants/routes';
+import { createClient } from '@/lib/supabase/server';
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
-  const next = searchParams.get('next') ?? DEFAULT_AUTHENTICATED_ROUTE;
+  const next = getSafeRedirectPath(
+    searchParams.get('next') ?? DEFAULT_AUTHENTICATED_ROUTE
+  );
 
   if (code) {
     const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
-      return NextResponse.redirect(`${origin}${next}`);
+      const session = await ensureValidSessionOrSignOut();
+
+      if (session.valid) {
+        return NextResponse.redirect(`${origin}${next}`);
+      }
+
+      return NextResponse.redirect(`${origin}/login?error=no_store`);
     }
   }
 

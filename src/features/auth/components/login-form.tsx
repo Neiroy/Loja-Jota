@@ -4,25 +4,10 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useActionState, useEffect } from 'react';
 
 import { loginAction } from '@/features/auth/actions/auth.actions';
+import { getSafeRedirectPath } from '@/lib/auth/get-safe-redirect-path';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  DEFAULT_AUTHENTICATED_ROUTE,
-  PROTECTED_ROUTE_PREFIXES,
-} from '@/lib/constants/routes';
-
-function getSafeRedirectPath(path: string | null) {
-  if (!path || !path.startsWith('/')) {
-    return DEFAULT_AUTHENTICATED_ROUTE;
-  }
-
-  const isAllowed = PROTECTED_ROUTE_PREFIXES.some(
-    (prefix) => path === prefix || path.startsWith(`${prefix}/`)
-  );
-
-  return isAllowed ? path : DEFAULT_AUTHENTICATED_ROUTE;
-}
 
 export function LoginForm() {
   const router = useRouter();
