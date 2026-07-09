@@ -75,6 +75,24 @@ export const requireStoreProfile = cache(async (): Promise<StoreContext> => {
     );
   }
 
+  const { data: store, error: storeError } = await storesRepository.findById(
+    profile.store_id
+  );
+
+  if (storeError || !store) {
+    throw new StoreContextError(
+      'Conta não vinculada a uma loja. Contate o administrador.',
+      'NO_STORE'
+    );
+  }
+
+  if (!store.is_active) {
+    throw new StoreContextError(
+      'Sua loja está inativa no momento. Entre em contato com o administrador.',
+      'INACTIVE_STORE'
+    );
+  }
+
   return {
     storeId: profile.store_id,
     userId: user.id,

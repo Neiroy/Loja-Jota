@@ -25,3 +25,9 @@ export async function createUser(input: CreateAuthUserInput) {
     },
   });
 }
+
+export async function deleteUser(userId: string) {
+  const supabase = createAdminClient();
+
+  return supabase.auth.admin.deleteUser(userId);
+}

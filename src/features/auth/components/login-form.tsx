@@ -5,6 +5,7 @@ import { useActionState, useEffect } from 'react';
 
 import { loginAction } from '@/features/auth/actions/auth.actions';
 import { getSafeRedirectPath } from '@/lib/auth/get-safe-redirect-path';
+import { getLoginErrorMessage } from '@/lib/auth/login-error-messages';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,8 +14,10 @@ export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = getSafeRedirectPath(searchParams.get('redirectTo'));
+  const queryErrorMessage = getLoginErrorMessage(searchParams.get('error'));
 
   const [state, formAction, isPending] = useActionState(loginAction, null);
+  const errorMessage = state?.error ?? queryErrorMessage;
 
   useEffect(() => {
     if (state?.success) {
@@ -65,8 +68,10 @@ export function LoginForm() {
         ) : null}
       </div>
 
-      {state?.error ? (
-        <p className="text-destructive text-sm">{state.error}</p>
+      {errorMessage ? (
+        <p className="text-destructive text-sm" role="alert">
+          {errorMessage}
+        </p>
       ) : null}
 
       <Button

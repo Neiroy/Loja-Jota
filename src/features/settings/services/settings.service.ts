@@ -59,7 +59,8 @@ function buildOverview(
       protectedRoutes: 'Ativo',
       rls: 'Ativo',
       users: 'Internos (cadastro manual)',
-      serviceRole: 'Não utilizada no app',
+      serviceRole:
+        'Utilizada apenas em rotinas administrativas seguras no servidor.',
     },
   };
 }

@@ -2,6 +2,7 @@
 
 import { redirect } from 'next/navigation';
 
+import { LOGIN_ERROR_MESSAGES } from '@/lib/auth/login-error-messages';
 import { AuthServiceError } from '@/services/auth.service';
 import * as authService from '@/services/auth.service';
 import { loginSchema } from '@/schemas/auth.schema';
@@ -48,9 +49,16 @@ export async function login(input: unknown): Promise<ActionResult<AuthUser>> {
       };
     }
 
+    if (error instanceof AuthServiceError && error.code === 'INACTIVE_STORE') {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+
     return {
       success: false,
-      error: 'E-mail ou senha inválidos.',
+      error: LOGIN_ERROR_MESSAGES.invalid_credentials,
     };
   }
 }

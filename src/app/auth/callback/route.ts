@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 
 import { getSafeRedirectPath } from '@/lib/auth/get-safe-redirect-path';
 import { ensureValidSessionOrSignOut } from '@/lib/auth/ensure-valid-session';
+import { getLoginRedirectForSessionReason } from '@/lib/auth/login-error-messages';
 import { DEFAULT_AUTHENTICATED_ROUTE } from '@/lib/constants/routes';
 import { createClient } from '@/lib/supabase/server';
 
@@ -23,7 +24,9 @@ export async function GET(request: Request) {
         return NextResponse.redirect(`${origin}${next}`);
       }
 
-      return NextResponse.redirect(`${origin}/login?error=no_store`);
+      return NextResponse.redirect(
+        `${origin}${getLoginRedirectForSessionReason(session.reason)}`
+      );
     }
   }
 

@@ -88,6 +88,35 @@ function resolveSlug(input: ProvisionStoreInput) {
   return slugify(baseSlug);
 }
 
+async function rollbackFailedProvision(storeId: string, userId: string) {
+  const profileResult = await profilesAdminRepository.deleteById(userId);
+
+  if (profileResult.error && process.env.NODE_ENV === 'development') {
+    console.error(
+      '[provisionStore] Falha ao remover profile parcial:',
+      profileResult.error
+    );
+  }
+
+  const authResult = await authAdminRepository.deleteUser(userId);
+
+  if (authResult.error && process.env.NODE_ENV === 'development') {
+    console.error(
+      '[provisionStore] Falha ao remover usuário Auth:',
+      authResult.error
+    );
+  }
+
+  const storeResult = await storesAdminRepository.deleteById(storeId);
+
+  if (storeResult.error && process.env.NODE_ENV === 'development') {
+    console.error(
+      '[provisionStore] Falha ao remover loja criada:',
+      storeResult.error
+    );
+  }
+}
+
 export async function listStores(): Promise<StoreListRow[]> {
   try {
     await requireStoreProvisioner();
@@ -211,8 +240,10 @@ export async function provisionStore(
     });
 
   if (profileError || !profile || profile.store_id !== store.id) {
+    await rollbackFailedProvision(store.id, authData.user.id);
+
     throw new StoreProvisioningServiceError(
-      'Conta criada, mas não vinculada corretamente à loja. Verifique o profile.',
+      'Não foi possível vincular a conta à loja. Tente novamente.',
       'PROFILE_LINK'
     );
   }

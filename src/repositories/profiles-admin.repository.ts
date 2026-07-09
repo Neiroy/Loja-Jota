@@ -62,3 +62,9 @@ export async function ensureProfile(input: EnsureProfileInput) {
     .select('*')
     .single<Profile>();
 }
+
+export async function deleteById(id: string) {
+  const supabase = createAdminClient();
+
+  return supabase.from('profiles').delete().eq('id', id);
+}
