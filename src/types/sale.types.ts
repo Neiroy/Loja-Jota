@@ -18,6 +18,8 @@ export type SaleListRow = {
   total: number;
   payment_method: import('@/types/database.types').PaymentMethod;
   payment_status: import('@/types/database.types').SalePaymentStatus;
+  card_payment_type: import('@/types/database.types').CardPaymentType | null;
+  installments_count: number | null;
   created_at: string;
   updated_at: string;
   customer_name: string;
@@ -46,6 +48,8 @@ export type SaleDetail = {
   total: number;
   payment_method: import('@/types/database.types').PaymentMethod;
   payment_status: import('@/types/database.types').SalePaymentStatus;
+  card_payment_type: import('@/types/database.types').CardPaymentType | null;
+  installments_count: number | null;
   created_at: string;
   updated_at: string;
   customer_name: string;
@@ -67,5 +71,7 @@ export type CreateSaleRpcInput = {
   customer_id: string;
   discount: number;
   payment_method: import('@/types/database.types').PaymentMethod;
+  card_payment_type: import('@/types/database.types').CardPaymentType | null;
+  installments_count: number | null;
   items: CreateSaleRpcItem[];
 };

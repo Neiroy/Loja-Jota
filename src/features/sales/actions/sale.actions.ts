@@ -52,6 +52,8 @@ function parseCreateSalePayload(formData: FormData) {
     customer_id: formData.get('customer_id'),
     discount: formData.get('discount') ?? '0',
     payment_method: formData.get('payment_method'),
+    card_payment_type: formData.get('card_payment_type'),
+    installments_count: formData.get('installments_count'),
     items,
   };
 }

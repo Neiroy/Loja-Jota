@@ -1,6 +1,6 @@
-import { getPaymentMethodLabel } from '@/features/sales/utils/payment-method-labels';
+import { getSalePaymentLabel } from '@/features/sales/utils/payment-method-labels';
 import { cn } from '@/lib/utils';
-import type { PaymentMethod } from '@/schemas/sale.schema';
+import type { CardPaymentType, PaymentMethod } from '@/schemas/sale.schema';
 
 const paymentStyles: Record<PaymentMethod, string> = {
   cash: 'border-stone-200/80 bg-stone-100 text-stone-700',
@@ -11,13 +11,23 @@ const paymentStyles: Record<PaymentMethod, string> = {
 
 type PaymentMethodBadgeProps = {
   method: PaymentMethod;
+  cardPaymentType?: CardPaymentType | null;
+  installmentsCount?: number | null;
   className?: string;
 };
 
 export function PaymentMethodBadge({
   method,
+  cardPaymentType = null,
+  installmentsCount = null,
   className,
 }: PaymentMethodBadgeProps) {
+  const label = getSalePaymentLabel({
+    payment_method: method,
+    card_payment_type: cardPaymentType,
+    installments_count: installmentsCount,
+  });
+
   return (
     <span
       className={cn(
@@ -26,7 +36,7 @@ export function PaymentMethodBadge({
         className
       )}
     >
-      {getPaymentMethodLabel(method)}
+      {label}
     </span>
   );
 }

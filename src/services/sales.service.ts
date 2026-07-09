@@ -43,6 +43,11 @@ function mapRpcErrorMessage(message?: string): string {
     'Desconto não pode ser maior que o subtotal.',
     'Total da venda não pode ser negativo.',
     'Venda fiada deve ter total maior que zero.',
+    'Tipo do cartão é obrigatório para pagamento com cartão.',
+    'Cartão débito não permite parcelamento.',
+    'Quantidade de parcelas é obrigatória para cartão crédito.',
+    'Quantidade de parcelas inválida.',
+    'Campos de cartão só são permitidos quando a forma de pagamento é cartão.',
   ];
 
   if (knownMessages.some((known) => message.includes(known))) {
@@ -145,6 +150,8 @@ export async function create(input: CreateSaleInput): Promise<string> {
     customer_id: parsed.data.customer_id,
     discount: parsed.data.discount,
     payment_method: parsed.data.payment_method,
+    card_payment_type: parsed.data.card_payment_type,
+    installments_count: parsed.data.installments_count,
     items: parsed.data.items,
   });
 

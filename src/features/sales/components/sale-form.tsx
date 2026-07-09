@@ -14,7 +14,12 @@ import { fieldControlClassName } from '@/lib/surface';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { FormSection } from '@/components/shared/form-section';
-import type { CreateSaleItemInput, PaymentMethod } from '@/schemas/sale.schema';
+import {
+  ALLOWED_INSTALLMENT_COUNTS,
+  type CardPaymentType,
+  type CreateSaleItemInput,
+  type PaymentMethod,
+} from '@/schemas/sale.schema';
 import type { Customer } from '@/types/customer.types';
 import type { Product } from '@/types/product.types';
 
@@ -30,6 +35,11 @@ const PAYMENT_OPTIONS: PaymentMethod[] = [
   'credit_30_days',
 ];
 
+const CARD_TYPE_OPTIONS: Array<{ value: CardPaymentType; label: string }> = [
+  { value: 'debit', label: 'Débito' },
+  { value: 'credit', label: 'Crédito' },
+];
+
 function createInitialItem(): CreateSaleItemInput {
   return {
     product_id: '',
@@ -41,6 +51,11 @@ export function SaleForm({ customers, products }: SaleFormProps) {
   const [customerId, setCustomerId] = useState('');
   const [discountDisplay, setDiscountDisplay] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('pix');
+  const [cardPaymentType, setCardPaymentType] =
+    useState<CardPaymentType | null>(null);
+  const [installmentsCount, setInstallmentsCount] = useState<number | null>(
+    null
+  );
   const [items, setItems] = useState<CreateSaleItemInput[]>([
     createInitialItem(),
   ]);
@@ -49,6 +64,26 @@ export function SaleForm({ customers, products }: SaleFormProps) {
   const itemsJson = useMemo(() => JSON.stringify(items), [items]);
   const discountValue = parseCurrencyBRToNumber(discountDisplay);
 
+  function handlePaymentMethodChange(method: PaymentMethod) {
+    setPaymentMethod(method);
+
+    if (method !== 'card') {
+      setCardPaymentType(null);
+      setInstallmentsCount(null);
+    }
+  }
+
+  function handleCardPaymentTypeChange(type: CardPaymentType) {
+    setCardPaymentType(type);
+
+    if (type === 'debit') {
+      setInstallmentsCount(null);
+      return;
+    }
+
+    setInstallmentsCount((current) => current ?? 1);
+  }
+
   return (
     <form
       action={formAction}
@@ -56,6 +91,18 @@ export function SaleForm({ customers, products }: SaleFormProps) {
     >
       <input type="hidden" name="items_json" value={itemsJson} />
       <input type="hidden" name="discount" value={discountValue} />
+      {paymentMethod === 'card' && cardPaymentType ? (
+        <input type="hidden" name="card_payment_type" value={cardPaymentType} />
+      ) : null}
+      {paymentMethod === 'card' &&
+      cardPaymentType === 'credit' &&
+      installmentsCount != null ? (
+        <input
+          type="hidden"
+          name="installments_count"
+          value={installmentsCount}
+        />
+      ) : null}
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_22rem] xl:items-start">
         <div className="space-y-6">
@@ -141,7 +188,7 @@ export function SaleForm({ customers, products }: SaleFormProps) {
                       name="payment_method"
                       value={method}
                       checked={paymentMethod === method}
-                      onChange={() => setPaymentMethod(method)}
+                      onChange={() => handlePaymentMethodChange(method)}
                       disabled={isPending}
                       className="size-4 accent-stone-900"
                     />
@@ -155,6 +202,75 @@ export function SaleForm({ customers, products }: SaleFormProps) {
                 </p>
               ) : null}
             </div>
+
+            {paymentMethod === 'card' ? (
+              <div className="space-y-4 rounded-xl border border-stone-200/70 bg-stone-50/50 p-4">
+                <div className="space-y-3">
+                  <Label>Tipo do cartão *</Label>
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    {CARD_TYPE_OPTIONS.map((option) => (
+                      <label
+                        key={option.value}
+                        className={cn(
+                          'flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 text-sm transition-colors',
+                          cardPaymentType === option.value
+                            ? 'border-stone-900 bg-stone-900 text-white shadow-sm'
+                            : 'border-stone-200/70 bg-white text-stone-700 hover:bg-stone-50'
+                        )}
+                      >
+                        <input
+                          type="radio"
+                          name="card_payment_type_ui"
+                          value={option.value}
+                          checked={cardPaymentType === option.value}
+                          onChange={() =>
+                            handleCardPaymentTypeChange(option.value)
+                          }
+                          disabled={isPending}
+                          className="size-4 accent-stone-900"
+                        />
+                        <span>{option.label}</span>
+                      </label>
+                    ))}
+                  </div>
+                  {state?.fieldErrors?.card_payment_type ? (
+                    <p className="text-destructive text-sm">
+                      {state.fieldErrors.card_payment_type[0]}
+                    </p>
+                  ) : null}
+                </div>
+
+                {cardPaymentType === 'credit' ? (
+                  <div className="space-y-2">
+                    <Label htmlFor="installments_count">Parcelamento *</Label>
+                    <select
+                      id="installments_count"
+                      value={installmentsCount ?? ''}
+                      onChange={(event) =>
+                        setInstallmentsCount(Number(event.target.value))
+                      }
+                      disabled={isPending}
+                      required
+                      className={fieldControlClassName}
+                    >
+                      <option value="" disabled>
+                        Selecione as parcelas
+                      </option>
+                      {ALLOWED_INSTALLMENT_COUNTS.map((count) => (
+                        <option key={count} value={count}>
+                          {count}x
+                        </option>
+                      ))}
+                    </select>
+                    {state?.fieldErrors?.installments_count ? (
+                      <p className="text-destructive text-sm">
+                        {state.fieldErrors.installments_count[0]}
+                      </p>
+                    ) : null}
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
           </FormSection>
         </div>
 
@@ -163,6 +279,9 @@ export function SaleForm({ customers, products }: SaleFormProps) {
             items={items}
             products={products}
             discount={discountValue}
+            paymentMethod={paymentMethod}
+            cardPaymentType={cardPaymentType}
+            installmentsCount={installmentsCount}
           />
         </div>
       </div>

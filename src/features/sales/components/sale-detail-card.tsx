@@ -38,7 +38,13 @@ export function SaleDetailCard({ sale }: SaleDetailCardProps) {
         />
         <DetailField
           label="Forma de pagamento"
-          value={<PaymentMethodBadge method={sale.payment_method} />}
+          value={
+            <PaymentMethodBadge
+              method={sale.payment_method}
+              cardPaymentType={sale.card_payment_type}
+              installmentsCount={sale.installments_count}
+            />
+          }
         />
         <DetailField
           label="Status do pagamento"

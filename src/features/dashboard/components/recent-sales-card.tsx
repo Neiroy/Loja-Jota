@@ -25,7 +25,13 @@ const columns: DataTableColumn<RecentSaleRow>[] = [
   {
     key: 'payment_method',
     header: 'Pagamento',
-    cell: (sale) => <PaymentMethodBadge method={sale.payment_method} />,
+    cell: (sale) => (
+      <PaymentMethodBadge
+        method={sale.payment_method}
+        cardPaymentType={sale.card_payment_type}
+        installmentsCount={sale.installments_count}
+      />
+    ),
   },
   {
     key: 'payment_status',

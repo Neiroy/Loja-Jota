@@ -1,16 +1,31 @@
 import { formatProductPrice } from '@/features/products/utils/format-product-price';
+import { getSalePaymentSummaryLabel } from '@/features/sales/utils/payment-method-labels';
 import { surfaceCardClassName } from '@/lib/surface';
 import { cn } from '@/lib/utils';
-import type { CreateSaleItemInput } from '@/schemas/sale.schema';
+import type {
+  CardPaymentType,
+  CreateSaleItemInput,
+  PaymentMethod,
+} from '@/schemas/sale.schema';
 import type { Product } from '@/types/product.types';
 
 type SaleSummaryProps = {
   items: CreateSaleItemInput[];
   products: Product[];
   discount: number;
+  paymentMethod: PaymentMethod;
+  cardPaymentType: CardPaymentType | null;
+  installmentsCount: number | null;
 };
 
-export function SaleSummary({ items, products, discount }: SaleSummaryProps) {
+export function SaleSummary({
+  items,
+  products,
+  discount,
+  paymentMethod,
+  cardPaymentType,
+  installmentsCount,
+}: SaleSummaryProps) {
   const productMap = new Map(products.map((product) => [product.id, product]));
 
   const subtotal = items.reduce((sum, item) => {
@@ -25,6 +40,14 @@ export function SaleSummary({ items, products, discount }: SaleSummaryProps) {
 
   const safeDiscount = Number.isFinite(discount) && discount > 0 ? discount : 0;
   const total = Math.max(subtotal - safeDiscount, 0);
+  const paymentSummary = getSalePaymentSummaryLabel(
+    {
+      payment_method: paymentMethod,
+      card_payment_type: cardPaymentType,
+      installments_count: installmentsCount,
+    },
+    total
+  );
 
   return (
     <aside className={cn(surfaceCardClassName, 'overflow-hidden')}>
@@ -53,6 +76,9 @@ export function SaleSummary({ items, products, discount }: SaleSummaryProps) {
           <span>Total estimado</span>
           <span>{formatProductPrice(total)}</span>
         </div>
+        {paymentSummary ? (
+          <p className="text-sm text-stone-600">{paymentSummary}</p>
+        ) : null}
       </div>
     </aside>
   );

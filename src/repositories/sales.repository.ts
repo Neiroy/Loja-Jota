@@ -15,6 +15,8 @@ type SaleListQueryRow = {
   total: number | string;
   payment_method: SaleListRow['payment_method'];
   payment_status: SaleListRow['payment_status'];
+  card_payment_type: SaleListRow['card_payment_type'];
+  installments_count: SaleListRow['installments_count'];
   created_at: string;
   updated_at: string;
   customers: { name: string } | { name: string }[] | null;
@@ -29,6 +31,8 @@ type SaleDetailQueryRow = {
   total: number | string;
   payment_method: SaleDetail['payment_method'];
   payment_status: SaleDetail['payment_status'];
+  card_payment_type: SaleDetail['card_payment_type'];
+  installments_count: SaleDetail['installments_count'];
   created_at: string;
   updated_at: string;
   customers: { name: string } | { name: string }[] | null;
@@ -91,6 +95,8 @@ function mapSaleListRow(row: SaleListQueryRow): SaleListRow {
     total: Number(row.total),
     payment_method: row.payment_method,
     payment_status: row.payment_status,
+    card_payment_type: row.card_payment_type,
+    installments_count: row.installments_count,
     created_at: row.created_at,
     updated_at: row.updated_at,
     customer_name: customer?.name ?? 'Cliente',
@@ -110,6 +116,8 @@ function mapSaleDetail(row: SaleDetailQueryRow): SaleDetail {
     total: Number(row.total),
     payment_method: row.payment_method,
     payment_status: row.payment_status,
+    card_payment_type: row.card_payment_type,
+    installments_count: row.installments_count,
     created_at: row.created_at,
     updated_at: row.updated_at,
     customer_name: customer?.name ?? 'Cliente',
@@ -163,6 +171,8 @@ export async function findAll(
         total,
         payment_method,
         payment_status,
+        card_payment_type,
+        installments_count,
         created_at,
         updated_at,
         customers ( name )
@@ -211,6 +221,8 @@ export async function findByIdWithDetails(storeId: string, id: string) {
         total,
         payment_method,
         payment_status,
+        card_payment_type,
+        installments_count,
         created_at,
         updated_at,
         customers ( name ),
@@ -245,6 +257,8 @@ export async function createSaleWithItems(input: CreateSaleRpcInput) {
     p_discount: input.discount,
     p_payment_method: input.payment_method,
     p_items: input.items,
+    p_card_payment_type: input.card_payment_type,
+    p_installments_count: input.installments_count,
   });
 }
 

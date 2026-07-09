@@ -5,6 +5,8 @@
 
 export type PaymentMethod = 'cash' | 'pix' | 'card' | 'credit_30_days';
 
+export type CardPaymentType = 'debit' | 'credit';
+
 export type SalePaymentStatus = 'paid' | 'pending' | 'cancelled';
 
 export type ReceivableStatus = 'open' | 'paid' | 'overdue' | 'cancelled';
@@ -71,6 +73,8 @@ export type Sale = {
   total: number;
   payment_method: PaymentMethod;
   payment_status: SalePaymentStatus;
+  card_payment_type: CardPaymentType | null;
+  installments_count: number | null;
   created_at: string;
   updated_at: string;
 };
@@ -205,6 +209,7 @@ export type Database = {
     };
     Enums: {
       payment_method: PaymentMethod;
+      card_payment_type: CardPaymentType;
       sale_payment_status: SalePaymentStatus;
       receivable_status: ReceivableStatus;
     };

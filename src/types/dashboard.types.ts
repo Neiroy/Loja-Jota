@@ -29,6 +29,8 @@ export type RecentSaleRow = {
   sale_date: string;
   payment_method: PaymentMethod;
   payment_status: SalePaymentStatus;
+  card_payment_type: import('@/types/database.types').CardPaymentType | null;
+  installments_count: number | null;
 };
 
 export type DashboardSnapshot = {
