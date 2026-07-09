@@ -15,24 +15,26 @@ Sistema **interno** de controle da loja. Este guia descreve como colocar o MVP e
        ↓ HTTPS
 [Vercel — Next.js 16 App Router]
        ↓
-  Middleware (sessão Supabase)
+  Proxy (src/proxy.ts — sessão Supabase)
+       ↓
+  Layout protegido (validação tenant/loja)
        ↓
   Server Actions → Services → Repositories
        ↓
 [Supabase — Auth + PostgreSQL + RPCs]
 ```
 
-| Componente         | Onde roda           | Responsabilidade                    |
-| ------------------ | ------------------- | ----------------------------------- |
-| **Frontend + API** | Vercel              | UI, middleware, Server Actions, SSR |
-| **Auth**           | Supabase Auth       | Login email/senha, sessão, cookies  |
-| **Banco**          | Supabase PostgreSQL | Dados, RLS, RPCs atômicas           |
-| **Migrations**     | SQL Editor (manual) | Schema, policies, funções           |
+| Componente         | Onde roda           | Responsabilidade                   |
+| ------------------ | ------------------- | ---------------------------------- |
+| **Frontend + API** | Vercel              | UI, proxy, Server Actions, SSR     |
+| **Auth**           | Supabase Auth       | Login email/senha, sessão, cookies |
+| **Banco**          | Supabase PostgreSQL | Dados, RLS, RPCs atômicas          |
+| **Migrations**     | SQL Editor (manual) | Schema, policies, funções          |
 
 ### Princípios
 
 - **Supabase separado do host Next.js** — o deploy do app não aplica SQL; migrations são manuais.
-- **Deploy recomendado na Vercel** — suporte nativo a Next.js, middleware, Server Actions e HTTPS.
+- **Deploy recomendado na Vercel** — suporte nativo a Next.js, proxy, Server Actions e HTTPS.
 - **Homologação antes de produção** — validar fluxo operacional completo antes de dados reais.
 - **Dois ambientes ideais** — projeto Supabase (e env vars) distintos para homolog e prod.
 
@@ -41,7 +43,7 @@ Sistema **interno** de controle da loja. Este guia descreve como colocar o MVP e
 | Documento                     | Conteúdo                           |
 | ----------------------------- | ---------------------------------- |
 | `docs/GO_LIVE_CHECKLIST.md`   | Checklist operacional imprimível   |
-| `supabase/MIGRATION_GUIDE.md` | Detalhe das migrations 001–005     |
+| `supabase/MIGRATION_GUIDE.md` | Detalhe das migrations 001–019     |
 | `supabase/README.md`          | Referência rápida Supabase         |
 | `docs/SECURITY_SPEC.md`       | Regras de segurança                |
 | `.env.example`                | Template das variáveis de ambiente |
@@ -74,17 +76,30 @@ As variáveis `NEXT_PUBLIC_*` são incluídas no bundle do cliente. Isso é **es
 
 ---
 
-## 3. Variáveis que não devem ser usadas
+## 3. Variáveis opcionais (provisionamento de lojas)
 
-| Variável                    | Motivo                                                                       |
-| --------------------------- | ---------------------------------------------------------------------------- |
-| `SUPABASE_SERVICE_ROLE_KEY` | Bypassa RLS; **não** está no código do sistema e **não** deve ser adicionada |
+Usadas **somente no servidor** quando **Configurações → Gerenciar lojas** está habilitado:
 
-O MVP opera exclusivamente com:
+| Variável                     | Onde obter / uso                                               |
+| ---------------------------- | -------------------------------------------------------------- |
+| `SUPABASE_SERVICE_ROLE_KEY`  | Supabase → Project Settings → API → **service_role** (secreto) |
+| `STORE_PROVISIONING_ENABLED` | `true` para habilitar a tela de provisionamento                |
 
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY` no client e server
+Requisitos no app:
+
+- `profiles.role === 'admin'`
+- Código em `src/lib/supabase/admin.ts` e repositories `*-admin` (server-only)
+- **Nunca** expor service role no client bundle
+
+Se o provisionamento **não** for usado, omita essas variáveis.
+
+### Operação padrão (sem provisionamento)
+
+O sistema opera com:
+
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` no server (via SSR)
 - Sessão autenticada do usuário interno
-- RLS em todas as tabelas de negócio
+- RLS multi-loja em todas as tabelas de negócio
 
 ---
 
@@ -113,6 +128,7 @@ Executar **antes** do primeiro deploy funcional.
 
 Confirmar em **Table Editor** ou via SQL (seção 6):
 
+- [ ] `stores`
 - [ ] `profiles`
 - [ ] `customers`
 - [ ] `products`
@@ -126,8 +142,9 @@ Confirmar em **Table Editor** ou via SQL (seção 6):
 
 ### Database — RPCs
 
-- [ ] `create_sale_with_items` — vendas atômicas com baixa de estoque e criação de fiado
-- [ ] `mark_receivable_as_paid` — quitação atômica de fiado
+- [ ] `create_sale_with_items` — vendas atômicas com baixa de estoque e receivables
+- [ ] `mark_receivable_as_paid` — quitação atômica de fiado/parcela
+- [ ] `cancel_sale` — cancelamento transacional com estorno de estoque
 
 Detalhes de aplicação: `supabase/MIGRATION_GUIDE.md`.
 
@@ -137,20 +154,34 @@ Detalhes de aplicação: `supabase/MIGRATION_GUIDE.md`.
 
 Migrations em `supabase/migrations/` — aplicar **manualmente** no **SQL Editor**, **na ordem**, **sem pular**.
 
-| Ordem | Arquivo                               | Conteúdo                                     |
-| ----- | ------------------------------------- | -------------------------------------------- |
-| 1     | `001_profiles.sql`                    | Profiles, trigger de signup, RLS de profiles |
-| 2     | `002_enums_and_tables.sql`            | Enums, 5 tabelas, índices, triggers          |
-| 3     | `003_rls_policies.sql`                | RLS e policies MVP                           |
-| 4     | `004_create_sale_with_items_rpc.sql`  | RPC atômica de vendas                        |
-| 5     | `005_mark_receivable_as_paid_rpc.sql` | RPC atômica de quitação de fiado             |
+| Ordem | Arquivo                                    | Conteúdo                                     |
+| ----- | ------------------------------------------ | -------------------------------------------- |
+| 1     | `001_profiles.sql`                         | Profiles, trigger de signup, RLS de profiles |
+| 2     | `002_enums_and_tables.sql`                 | Enums, tabelas, índices, triggers            |
+| 3     | `003_rls_policies.sql`                     | RLS MVP (base)                               |
+| 4     | `004_create_sale_with_items_rpc.sql`       | RPC atômica de vendas                        |
+| 5     | `005_mark_receivable_as_paid_rpc.sql`      | RPC atômica de quitação                      |
+| 6     | `006_stores.sql`                           | Tabela `stores`                              |
+| 7     | `007_add_store_id_columns.sql`             | Colunas `store_id`                           |
+| 8     | `008_backfill_default_store.sql`           | Backfill multi-loja                          |
+| 9     | `009_store_id_not_null_and_indexes.sql`    | NOT NULL + índices                           |
+| 10    | `010_rls_multi_tenant.sql`                 | RLS por tenant                               |
+| 11    | `011_rpc_multi_tenant.sql`                 | RPCs multi-loja                              |
+| 12    | `012_update_handle_new_user.sql`           | Trigger signup com loja                      |
+| 13    | `013_store_logo.sql`                       | Logo por loja                                |
+| 14    | `014_tenant_delete_customers_products.sql` | DELETE clientes/produtos                     |
+| 15    | `015_lock_profile_store_role.sql`          | Protege `store_id`/`role`                    |
+| 16    | `016_cancel_sale_rpc.sql`                  | RPC `cancel_sale`                            |
+| 17    | `017_sale_card_payment.sql`                | Cartão débito/crédito                        |
+| 18    | `018_sale_installment_financing.sql`       | Pix/dinheiro parcelado                       |
+| 19    | `019_lock_profile_insert.sql`              | Bloqueia INSERT em profiles                  |
 
 ### Por ambiente
 
-- [ ] **Homologação:** migrations 001–005 aplicadas e validadas
-- [ ] **Produção:** migrations 001–005 aplicadas e validadas (projeto Supabase separado recomendado)
+- [ ] **Homologação:** migrations 001–019 aplicadas e validadas
+- [ ] **Produção:** migrations 001–019 aplicadas e validadas (projeto Supabase separado recomendado)
 
-O app **não funciona** para vendas/fiados se 004 ou 005 estiverem ausentes.
+O app **não funciona** corretamente se migrations essenciais estiverem ausentes (vendas/fiados: 004–005; multi-loja: 006–012; cancelamento/cartão/parcelamento: 016–018).
 
 ---
 
@@ -167,7 +198,7 @@ where schemaname = 'public'
 order by tablename;
 ```
 
-Esperado: `customers`, `products`, `profiles`, `receivables`, `sale_items`, `sales`.
+Esperado: `customers`, `products`, `profiles`, `receivables`, `sale_items`, `sales`, `stores`.
 
 ### RLS
 
@@ -176,6 +207,7 @@ select tablename, rowsecurity
 from pg_tables
 where schemaname = 'public'
   and tablename in (
+    'stores',
     'profiles',
     'customers',
     'products',
@@ -210,17 +242,32 @@ where routine_schema = 'public'
 
 Esperado: uma linha retornada; `security_type = INVOKER`.
 
+### RPC `cancel_sale`
+
+```sql
+select routine_name, routine_type, security_type
+from information_schema.routines
+where routine_schema = 'public'
+  and routine_name = 'cancel_sale';
+```
+
+Esperado: uma linha retornada; `security_type = INVOKER`.
+
 ### Permissões (opcional)
 
 ```sql
 select routine_name, grantee, privilege_type
 from information_schema.routine_privileges
 where routine_schema = 'public'
-  and routine_name in ('create_sale_with_items', 'mark_receivable_as_paid')
+  and routine_name in (
+    'create_sale_with_items',
+    'mark_receivable_as_paid',
+    'cancel_sale'
+  )
   and grantee = 'authenticated';
 ```
 
-Esperado: `EXECUTE` para `authenticated` em ambas.
+Esperado: `EXECUTE` para `authenticated` em todas.
 
 ### Policies (opcional)
 
@@ -250,6 +297,7 @@ order by tablename, policyname;
 5. [ ] Configure **Environment Variables**:
    - `NEXT_PUBLIC_SUPABASE_URL` → URL do projeto Supabase **deste ambiente**
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY` → anon key **deste ambiente**
+   - (Opcional) `SUPABASE_SERVICE_ROLE_KEY` + `STORE_PROVISIONING_ENABLED=true` se provisionamento ativo
 6. [ ] Defina escopo: Production / Preview conforme homolog ou prod
 7. [ ] **Deploy**
 8. [ ] Anote a URL gerada (ex.: `https://sistema-loja-jota.vercel.app`)
@@ -290,10 +338,13 @@ Executar na URL de homologação (e repetir em produção após go-live).
 
 ### Fluxos críticos
 
-- [ ] **Venda à vista** — estoque baixa; `payment_status = paid`; sem receivable
+- [ ] **Venda à vista** (dinheiro/Pix/cartão) — estoque baixa; `payment_status = paid`
 - [ ] **Venda fiada** (`credit_30_days`) — receivable criado; estoque baixa; venda `pending`
-- [ ] **Quitação de fiado** — Pix, dinheiro ou cartão; fiado `paid`; venda `paid`; estoque inalterado na quitação
-- [ ] **Dashboard** — KPIs atualizados após venda e quitação
+- [ ] **Pix/dinheiro parcelado** — N receivables; `partially_paid` ou `paid`
+- [ ] **Cartão crédito parcelado** — informativo; venda `paid`
+- [ ] **Quitação** — Pix, dinheiro ou cartão; atualiza parcela e status da venda
+- [ ] **Cancelamento** — bloqueado se parcela paga; estoque devolvido quando permitido
+- [ ] **Dashboard** — KPIs atualizados; vendas canceladas excluídas
 - [ ] Link venda ↔ fiado no detalhe da venda
 
 ### Responsividade (amostra)
@@ -307,10 +358,10 @@ Executar na URL de homologação (e repetir em produção após go-live).
 ## 9. Checklist de segurança
 
 - [ ] `.env.local` fora do Git (`.gitignore` cobre `.env*`)
-- [ ] `SUPABASE_SERVICE_ROLE_KEY` **não** configurada no Vercel
-- [ ] Nenhum secret além de `NEXT_PUBLIC_*` no painel do host
+- [ ] `SUPABASE_SERVICE_ROLE_KEY` **somente** no servidor, se usada; **nunca** no client bundle
+- [ ] Nenhum secret além de `NEXT_PUBLIC_*` exposto indevidamente no painel do host
 - [ ] Bundle do browser **não** contém service role (DevTools → Sources)
-- [ ] RLS ativo em todas as tabelas de negócio
+- [ ] RLS multi-loja ativo em todas as tabelas de negócio
 - [ ] Sign-up público desabilitado no Supabase (quando disponível)
 - [ ] Usuários criados **manualmente** — sem cadastro público no app
 - [ ] HTTPS ativo (padrão Vercel)
@@ -377,7 +428,7 @@ Tempo estimado: **1–5 minutos** para rollback de app.
 - **Dados de teste não devem ir para produção** — bancos separados evitam contaminação
 - **Usuários reais** criados apenas no Supabase de **produção**
 - **Previews Vercel** devem usar env vars de **homolog**, nunca de produção
-- Validar migrations 001–005 em homolog **antes** de replicar em produção
+- Validar migrations 001–019 em homolog **antes** de replicar em produção
 
 ---
 
@@ -386,7 +437,7 @@ Tempo estimado: **1–5 minutos** para rollback de app.
 ```
 1. Homologação
    ├─ Criar projeto Supabase Homolog
-   ├─ Aplicar migrations 001 → 005
+   ├─ Aplicar migrations 001 → 019
    ├─ Validar SQL (seção 6)
    ├─ Criar usuários de teste
    ├─ Deploy Vercel (Preview ou staging)
@@ -400,7 +451,7 @@ Tempo estimado: **1–5 minutos** para rollback de app.
 
 3. Produção
    ├─ Criar projeto Supabase Produção
-   ├─ Aplicar migrations 001 → 005
+   ├─ Aplicar migrations 001 → 019
    ├─ Backup configurado (se plano permitir)
    ├─ Criar usuários reais
    ├─ Deploy Vercel Production + env vars prod

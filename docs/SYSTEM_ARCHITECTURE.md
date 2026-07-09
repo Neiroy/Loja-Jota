@@ -8,7 +8,7 @@ Page / RSC
     → Service
       → Repository
         → Supabase Server Client
-          → Database (PostgreSQL)
+          → Database (PostgreSQL + RLS)
 ```
 
 Nenhuma camada pode pular a anterior. Pages **nunca** acessam Repository ou Supabase diretamente.
@@ -18,188 +18,102 @@ Nenhuma camada pode pular a anterior. Pages **nunca** acessam Repository ou Supa
 ### Pages / RSC (`src/app/`)
 
 - Renderizar páginas e layouts
-- Buscar dados iniciais quando necessário (via Server Actions ou props)
+- Guards server-side quando necessário (ex.: `/configuracoes/lojas`)
 - Compor componentes de `components/` e `features/`
 - **Não** conter regra de negócio complexa
-- **Não** executar queries ou mutações diretamente
 
 ### Server Actions (`src/features/*/actions/`)
 
-- Receber dados de formulários e interações
-- Validar toda entrada com Zod (`src/schemas/`)
-- Chamar o Service correspondente
-- Retornar resultado padronizado (sucesso ou erro)
-- **Não** conter lógica de domínio complexa
-- **Não** executar queries Supabase
+- Receber dados de formulários
+- Validar com Zod (`src/schemas/`)
+- Chamar Service
+- Retornar resultado padronizado
 
-### Services (`src/services/`)
+### Services (`src/services/` e `src/features/*/services/`)
 
-- Concentrar regras de negócio
-- Validar estoque antes de vendas
-- Calcular totais no servidor (subtotal, desconto, total)
-- Criar vendas com itens
-- Criar fiados automaticamente quando `payment_method = credit_30_days`
-- Marcar fiados como pagos
-- Identificar fiados vencidos (`overdue`)
-- Orquestrar operações compostas (transações)
-- **Não** conter JSX ou lógica visual
-- **Não** acessar Supabase diretamente (usar Repositories)
+- Regras de negócio
+- Orquestração de RPCs e repositories
+- Resolução de tenant via `getCurrentStoreId()`
+- **Não** acessar Supabase diretamente
 
 ### Repositories (`src/repositories/`)
 
-- Comunicação direta com Supabase (queries, inserts, updates)
-- Retornar tipos do domínio
-- **Não** conter regra de negócio complexa
-- **Não** conter regra visual
+- Queries Supabase com filtro `store_id`
+- Repositories `*-admin` para operações com service role (provisionamento)
 
-### Schemas (`src/schemas/`)
-
-- Validação Zod de toda entrada do sistema
-- Schemas de criação, edição e ações específicas
-
-### Types (`src/types/`)
-
-- Tipagens compartilhadas do domínio
-- Tipos derivados de Zod (`z.infer<>`)
-- Tipos gerados do Supabase (`database.types.ts` — fase futura)
-
-## Estrutura de pastas
+## Estrutura de pastas (resumo)
 
 ```
-Sistema Controle Loja Jota/
-├── docs/                              # Documentação (fora de src/)
-│
-└── src/
-    ├── app/
-    │   ├── (auth)/
-    │   │   └── login/
-    │   └── (protected)/
-    │       ├── dashboard/
-    │       ├── clientes/
-    │       ├── produtos/
-    │       ├── vendas/
-    │       ├── fiados/
-    │       └── configuracoes/
-    │
-    ├── components/
-    │   ├── ui/                          # shadcn/ui primitives
-    │   ├── layout/                      # Sidebar, Topbar, PageHeader
-    │   └── shared/                      # AuthCard, DataTable, StatusBadge, etc.
-    │
-    ├── features/
-    │   ├── auth/
-    │   ├── dashboard/
-    │   ├── customers/
-    │   ├── products/
-    │   ├── sales/
-    │   └── receivables/
-    │
-    ├── lib/
-    │   ├── supabase/                    # server.ts, client.ts, middleware
-    │   ├── utils/
-    │   └── constants/
-    │
-    ├── repositories/
-    │   ├── customers.repository.ts
-    │   ├── products.repository.ts
-    │   ├── sales.repository.ts
-    │   └── receivables.repository.ts
-    │
-    ├── services/
-    │   ├── customers.service.ts
-    │   ├── products.service.ts
-    │   ├── sales.service.ts
-    │   └── receivables.service.ts
-    │
-    ├── schemas/
-    │   ├── customer.schema.ts
-    │   ├── product.schema.ts
-    │   ├── sale.schema.ts
-    │   └── receivable.schema.ts
-    │
-    └── types/
-        ├── customer.types.ts
-        ├── product.types.ts
-        ├── sale.types.ts
-        └── receivable.types.ts
+src/
+├── app/
+│   ├── (auth)/login/
+│   ├── auth/callback/
+│   └── (protected)/
+│       ├── dashboard/, clientes/, produtos/
+│       ├── vendas/, fiados/, configuracoes/
+│       └── layout.tsx          # gate tenant + AppShell
+├── features/
+│   ├── auth/, dashboard/, customers/, products/
+│   ├── sales/, receivables/, settings/, stores/
+├── lib/
+│   ├── supabase/               # server.ts, admin.ts, middleware.ts
+│   ├── tenant/                 # get-current-store, require-store-provisioner
+│   └── auth/                   # ensure-valid-session, login-error-messages
+├── repositories/
+├── services/
+├── schemas/
+└── types/
 ```
-
-## Organização por feature
-
-Cada domínio em `src/features/<nome>/`:
-
-```
-features/customers/
-├── actions/           # Server Actions do módulo
-├── components/        # UI específica do módulo
-└── hooks/             # Apenas se necessário (client components)
-```
-
-Código compartilhado permanece em `repositories/`, `services/`, `schemas/`, `types/`, `components/`.
-
-## Padrão de resposta (Server Actions)
-
-```typescript
-type ActionResult<T = void> = {
-  success: boolean;
-  data?: T;
-  error?: string;
-  fieldErrors?: Record<string, string[]>;
-};
-```
-
-- `success: true` → operação concluída; `data` opcional
-- `success: false` → `error` (mensagem geral) ou `fieldErrors` (validação Zod)
-- Mensagens de erro ao usuário sempre em português
-
-## Server Components vs Client Components
-
-- **Server Component** por padrão em todo o projeto
-- `'use client'` apenas quando necessário: formulários interativos, dialogs, hooks de estado, toasts
-- Dados sensíveis nunca buscados no client via Supabase anon key
 
 ## Autenticação e proteção de rotas
 
-- Supabase Auth com email/senha
-- `src/middleware.ts` protege rotas em `(protected)/`
-- Rotas públicas: `/login`, `/auth/callback`
-- Sessão validada via Supabase Server Client em toda operação server-side
-- Perfil do usuário em tabela `profiles` (ver `docs/DATABASE_SPEC.md`)
+| Camada   | Arquivo                            | Função                                                   |
+| -------- | ---------------------------------- | -------------------------------------------------------- |
+| Proxy    | `src/proxy.ts`                     | Sessão Supabase; redirects login/dashboard               |
+| Layout   | `src/app/(protected)/layout.tsx`   | `ensureValidSessionOrSignOut()` — loja ativa obrigatória |
+| Login    | Server Actions + `auth.service.ts` | Valida credenciais + profile + loja                      |
+| Callback | `src/app/auth/callback/route.ts`   | OAuth + validação de sessão                              |
 
-## Transações
+Rotas públicas: `/login`, `/auth/callback`.
 
-Operações compostas (criar venda + itens + baixar estoque + criar receivable) devem ser atômicas.
+**Nota:** `src/middleware.ts` foi substituído por `src/proxy.ts` (Next.js 16). Não existe `client.ts` — auth 100% server-side.
 
-**Estratégia recomendada:** função RPC PostgreSQL `create_sale_with_items` documentada em `docs/DATABASE_SPEC.md`.
+## Multi-loja
 
-## Fluxo de criação de venda (referência)
+- Tabela `stores`; `store_id` em profiles e tabelas de negócio
+- RLS via `current_user_store_id()` (migration 010)
+- Branding por loja (logo, monograma) via `getCurrentStoreBranding()`
+- Provisionamento admin em `features/stores/` (opcional, service role)
 
-```
-1. Page renderiza formulário de venda
-2. Server Action recebe payload → valida com sale.schema.ts
-3. sales.service.ts:
-   a. Valida cliente ativo
-   b. Valida estoque de cada item
-   c. Calcula subtotal, desconto, total no servidor
-   d. Chama RPC ou orquestra repositories em transação
-   e. Se credit_30_days → cria receivable (due_date = sale_date + 30 dias)
-4. Repository persiste dados
-5. Action retorna ActionResult com venda criada
-```
+## Transações financeiras (RPCs)
+
+| RPC                       | Uso                                   |
+| ------------------------- | ------------------------------------- |
+| `create_sale_with_items`  | Venda + itens + estoque + receivables |
+| `mark_receivable_as_paid` | Quitação de fiado/parcela             |
+| `cancel_sale`             | Cancelamento + estorno de estoque     |
+
+Detalhes em `docs/DATABASE_SPEC.md`.
+
+## Server Components vs Client Components
+
+- Server Component por padrão
+- `'use client'` apenas para formulários, dialogs, filtros interativos, toasts
+- Dados sensíveis nunca buscados no client via Supabase
 
 ## Anti-patterns (proibido)
 
 - Page chamando Repository ou Supabase diretamente
-- API Routes para CRUD interno (usar Server Actions)
-- Lógica de negócio em components ou repositories
-- Totais calculados no client e aceitos sem recálculo no servidor
+- API Routes para CRUD interno
+- Lógica de negócio em components
+- Totais aceitos do client sem recálculo no servidor
 - DELETE físico em tabelas financeiras
 - Expor `SUPABASE_SERVICE_ROLE_KEY` no client bundle
+- Importar módulos `server-only` em Client Components
 
 ## Documentação relacionada
 
-- Regras de negócio: `docs/BUSINESS_RULES.md`
-- Banco de dados: `docs/DATABASE_SPEC.md`
+- Regras: `docs/BUSINESS_RULES.md`
+- Banco: `docs/DATABASE_SPEC.md`
 - Segurança: `docs/SECURITY_SPEC.md`
-- Padrões de código: `docs/CODING_RULES.md`
-- Guardrails IA: `docs/AI_GUARDRAILS.md`
+- Deploy: `docs/DEPLOY_GUIDE.md`

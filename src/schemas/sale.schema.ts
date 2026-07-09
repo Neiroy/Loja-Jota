@@ -17,9 +17,6 @@ export const ALLOWED_FINANCING_INSTALLMENT_COUNTS = [
   2, 3, 4, 5, 6, 10, 12,
 ] as const;
 
-/** @deprecated Use ALLOWED_CARD_INSTALLMENT_COUNTS */
-export const ALLOWED_INSTALLMENT_COUNTS = ALLOWED_CARD_INSTALLMENT_COUNTS;
-
 export const cardInstallmentsCountSchema = z.coerce
   .number({ error: 'Parcelamento inválido.' })
   .int('Parcelamento deve ser um número inteiro.')

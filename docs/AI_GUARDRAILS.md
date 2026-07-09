@@ -13,8 +13,15 @@ Regras obrigatórias para qualquer agente de IA trabalhando neste projeto.
 - **Não** criar carrinho público
 - **Não** criar página pública de produtos
 - **Não** criar cadastro público de clientes
-- **Não** implementar ERP, nota fiscal, marketplace ou multi-loja
+- **Não** implementar ERP, nota fiscal ou marketplace
+- **Não** integrar gateway de pagamento externo (Mercado Pago, Stripe, etc.)
 - **Não** adicionar gráficos complexos ou dashboards poluídos
+
+### Já implementado (não remover sem aprovação)
+
+- **Multi-loja** com isolamento por `store_id` e RLS (migrations 006–012)
+- Cartão débito/crédito, Pix/dinheiro parcelado, cancelamento de venda
+- Provisionamento admin de lojas (opcional, service role server-only)
 
 ---
 
@@ -76,7 +83,8 @@ Sem uma dessas frases, **nenhum arquivo deve ser criado ou alterado**.
 ## Dados e segurança
 
 - **Não** usar DELETE físico em tabelas financeiras (`sales`, `sale_items`, `receivables`)
-- **Não** expor `SUPABASE_SERVICE_ROLE_KEY` no client
+- **Não** expor `SUPABASE_SERVICE_ROLE_KEY` no client bundle
+- Service role **permitida** apenas server-side para provisionamento (ver `docs/SECURITY_SPEC.md`)
 - **Não** commitar `.env`, `.env.local` ou qualquer secret
 - **Não** aceitar totais calculados no client sem recálculo no servidor
 - **Não** pular validação Zod em Server Actions

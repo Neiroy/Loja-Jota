@@ -65,8 +65,8 @@ Fase 1 concluída.
 
 - [x] Projeto Supabase criado (remoto)
 - [x] Variáveis em `.env.local`
-- [x] `src/lib/supabase/server.ts` e `client.ts`
-- [x] `src/middleware.ts` protegendo rotas `(protected)/`
+- [x] `src/lib/supabase/server.ts` (auth 100% server-side; `client.ts` removido na Fase 4A)
+- [x] `src/proxy.ts` protegendo rotas `(protected)/` (substitui `middleware.ts`)
 - [x] Página de login (`src/app/(auth)/login/`)
 - [x] Server Actions: login, logout
 - [x] Tabela `profiles` + trigger de signup (SQL em `supabase/migrations/001_profiles.sql`)
@@ -328,9 +328,14 @@ Fase 12 (multi-loja) concluída.
 
 - [x] `docs/DEPLOY_GUIDE.md` — guia completo de deploy (Vercel + Supabase)
 - [x] `docs/GO_LIVE_CHECKLIST.md` — checklist operacional go-live
-- [x] `supabase/README.md` — atualizado (migrations 001–005, links deploy)
+- [x] `supabase/README.md` — referência Supabase
 
-### Etapa 2 — Deploy assistido (pendente)
+### Etapa 2 — Revisão final para produção ✅
+
+- [x] **Fase 4A** — limpeza segura (`client.ts`, exports deprecated)
+- [x] **Fase 4B** — documentação atualizada (migrations 001–019, proxy, multi-loja, financeiro)
+
+### Etapa 3 — Deploy assistido (pendente)
 
 - [ ] Repositório Git remoto conectado à Vercel
 - [ ] Homologação: Supabase + Vercel + teste funcional

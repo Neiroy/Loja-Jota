@@ -1,8 +1,8 @@
 # Especificação do Banco de Dados
 
-Banco: **PostgreSQL** via **Supabase**.
+Banco: **PostgreSQL** via **Supabase**, **multi-loja** com RLS por `store_id`.
 
-Todas as tabelas possuem **RLS habilitado**. Detalhes de policies em `docs/SECURITY_SPEC.md`.
+Policies detalhadas: `docs/SECURITY_SPEC.md`. Migrations: `supabase/MIGRATION_GUIDE.md`.
 
 ---
 
@@ -10,20 +10,21 @@ Todas as tabelas possuem **RLS habilitado**. Detalhes de policies em `docs/SECUR
 
 ### `sale_payment_status`
 
-| Valor       | Descrição                             |
-| ----------- | ------------------------------------- |
-| `paid`      | Venda quitada (à vista ou fiado pago) |
-| `pending`   | Venda fiada aguardando pagamento      |
-| `cancelled` | Venda cancelada                       |
+| Valor            | Descrição                                       |
+| ---------------- | ----------------------------------------------- |
+| `paid`           | Venda quitada (à vista ou todas parcelas pagas) |
+| `pending`        | Fiado 30 dias aguardando pagamento              |
+| `partially_paid` | Parcelas pendentes (Pix/dinheiro parcelado)     |
+| `cancelled`      | Venda cancelada                                 |
 
 ### `receivable_status`
 
-| Valor       | Descrição                                     |
-| ----------- | --------------------------------------------- |
-| `open`      | Fiado em aberto, dentro do prazo              |
-| `paid`      | Fiado quitado                                 |
-| `overdue`   | Fiado vencido (due_date < hoje e estava open) |
-| `cancelled` | Fiado cancelado (venda cancelada)             |
+| Valor       | Descrição                               |
+| ----------- | --------------------------------------- |
+| `open`      | Em aberto, dentro do prazo              |
+| `paid`      | Quitado                                 |
+| `overdue`   | Vencido (`due_date < hoje`, era `open`) |
+| `cancelled` | Cancelado (venda cancelada)             |
 
 ### `payment_method`
 
@@ -34,235 +35,139 @@ Todas as tabelas possuem **RLS habilitado**. Detalhes de policies em `docs/SECUR
 | `card`           | Cartão        |
 | `credit_30_days` | Fiado 30 dias |
 
+### `card_payment_type` (017)
+
+| Valor    | Descrição      |
+| -------- | -------------- |
+| `debit`  | Cartão débito  |
+| `credit` | Cartão crédito |
+
 ---
 
 ## Tabelas
 
+### `stores` (006)
+
+| Coluna       | Tipo          | Notas                         |
+| ------------ | ------------- | ----------------------------- |
+| `id`         | `uuid`        | PK                            |
+| `name`       | `text`        | NOT NULL                      |
+| `slug`       | `text`        | UNIQUE                        |
+| `is_active`  | `boolean`     | default `true`                |
+| `logo_path`  | `text`        | nullable (013) — storage path |
+| `created_at` | `timestamptz` |                               |
+| `updated_at` | `timestamptz` |                               |
+
 ### `profiles`
 
-Espelha usuários autenticados do Supabase Auth.
+| Coluna       | Tipo          | Notas                         |
+| ------------ | ------------- | ----------------------------- |
+| `id`         | `uuid`        | PK, FK → `auth.users`         |
+| `full_name`  | `text`        | NOT NULL                      |
+| `role`       | `text`        | `admin` \| `operator`         |
+| `store_id`   | `uuid`        | FK → `stores`, NOT NULL (009) |
+| `created_at` | `timestamptz` |                               |
+| `updated_at` | `timestamptz` |                               |
 
-| Coluna       | Tipo          | Constraints                                 |
-| ------------ | ------------- | ------------------------------------------- |
-| `id`         | `uuid`        | PK, FK → `auth.users(id)` ON DELETE CASCADE |
-| `full_name`  | `text`        | NOT NULL                                    |
-| `role`       | `text`        | NOT NULL, default `'operator'`              |
-| `created_at` | `timestamptz` | NOT NULL, default `now()`                   |
-| `updated_at` | `timestamptz` | NOT NULL, default `now()`                   |
+**Segurança (015, 019):**
 
-**Notas:**
+- INSERT autenticado **bloqueado** — profile via trigger (012) ou service role
+- UPDATE de `store_id`/`role` **bloqueado** para usuário (015)
 
-- Criado via trigger no signup (`auth.users` → `profiles`)
-- `role` preparado para evolução futura; MVP trata todos os autenticados igualmente
+### `customers`, `products`, `sales`, `sale_items`, `receivables`
 
----
+Todas possuem `store_id uuid NOT NULL` (007–009). Demais colunas conforme MVP (002), com extensões abaixo.
 
-### `customers`
+### `sales` — colunas adicionais
 
-| Coluna       | Tipo          | Constraints                     |
-| ------------ | ------------- | ------------------------------- |
-| `id`         | `uuid`        | PK, default `gen_random_uuid()` |
-| `name`       | `text`        | NOT NULL                        |
-| `phone`      | `text`        | nullable                        |
-| `cpf`        | `text`        | nullable, UNIQUE                |
-| `notes`      | `text`        | nullable                        |
-| `is_active`  | `boolean`     | NOT NULL, default `true`        |
-| `created_at` | `timestamptz` | NOT NULL, default `now()`       |
-| `updated_at` | `timestamptz` | NOT NULL, default `now()`       |
+| Coluna                         | Migration | Descrição                             |
+| ------------------------------ | --------- | ------------------------------------- |
+| `card_payment_type`            | 017       | `debit` \| `credit` quando `card`     |
+| `installments_count`           | 017       | Parcelas cartão crédito (informativo) |
+| `down_payment`                 | 018       | Entrada em Pix/dinheiro parcelado     |
+| `financing_installments_count` | 018       | N parcelas Pix/dinheiro               |
 
----
+### `receivables` — relação com vendas
 
-### `products`
+| Coluna               | Migration | Descrição                  |
+| -------------------- | --------- | -------------------------- |
+| `installment_number` | 018       | Número da parcela (1..N)   |
+| `installments_total` | 018       | Total de parcelas da venda |
 
-| Coluna           | Tipo            | Constraints                         |
-| ---------------- | --------------- | ----------------------------------- |
-| `id`             | `uuid`          | PK, default `gen_random_uuid()`     |
-| `name`           | `text`          | NOT NULL                            |
-| `category`       | `text`          | nullable                            |
-| `size`           | `text`          | nullable                            |
-| `color`          | `text`          | nullable                            |
-| `sale_price`     | `numeric(12,2)` | NOT NULL, CHECK `>= 0`              |
-| `stock_quantity` | `integer`       | NOT NULL, default `0`, CHECK `>= 0` |
-| `is_active`      | `boolean`       | NOT NULL, default `true`            |
-| `created_at`     | `timestamptz`   | NOT NULL, default `now()`           |
-| `updated_at`     | `timestamptz`   | NOT NULL, default `now()`           |
+- **Antes (005):** 1 receivable por venda (`sale_id` UNIQUE)
+- **Atual (018):** N receivables por venda — UNIQUE `(sale_id, installment_number)`
+- Fiado 30 dias: 1 receivable com `installments_total = 1`
+- Pix/dinheiro parcelado: N receivables + entrada opcional
 
 ---
 
-### `sales`
+## Funções e RPCs
 
-| Coluna           | Tipo                  | Constraints                         |
-| ---------------- | --------------------- | ----------------------------------- |
-| `id`             | `uuid`                | PK, default `gen_random_uuid()`     |
-| `customer_id`    | `uuid`                | NOT NULL, FK → `customers(id)`      |
-| `sale_date`      | `date`                | NOT NULL, default `CURRENT_DATE`    |
-| `subtotal`       | `numeric(12,2)`       | NOT NULL, CHECK `>= 0`              |
-| `discount`       | `numeric(12,2)`       | NOT NULL, default `0`, CHECK `>= 0` |
-| `total`          | `numeric(12,2)`       | NOT NULL, CHECK `>= 0`              |
-| `payment_method` | `payment_method`      | NOT NULL (enum)                     |
-| `payment_status` | `sale_payment_status` | NOT NULL (enum)                     |
-| `created_at`     | `timestamptz`         | NOT NULL, default `now()`           |
-| `updated_at`     | `timestamptz`         | NOT NULL, default `now()`           |
+### `current_user_store_id()` (010)
 
-**Constraints adicionais:**
+Retorna `profiles.store_id` do usuário autenticado. Usada em policies e RPCs.
 
-- CHECK `total = subtotal - discount`
-- CHECK `discount <= subtotal`
+### `create_sale_with_items` (004 → 011 → 017 → 018)
 
----
+Transação atômica. Parâmetros incluem (conforme versão):
 
-### `sale_items`
+- `customer_id`, `discount`, `payment_method`, `items[]`
+- `card_payment_type`, `installments_count` (cartão)
+- `down_payment`, `financing_installments_count` (Pix/dinheiro parcelado)
 
-| Coluna       | Tipo            | Constraints                                   |
-| ------------ | --------------- | --------------------------------------------- |
-| `id`         | `uuid`          | PK, default `gen_random_uuid()`               |
-| `sale_id`    | `uuid`          | NOT NULL, FK → `sales(id)` ON DELETE RESTRICT |
-| `product_id` | `uuid`          | NOT NULL, FK → `products(id)`                 |
-| `quantity`   | `integer`       | NOT NULL, CHECK `> 0`                         |
-| `unit_price` | `numeric(12,2)` | NOT NULL, CHECK `>= 0`                        |
-| `total`      | `numeric(12,2)` | NOT NULL, CHECK `>= 0`                        |
-| `created_at` | `timestamptz`   | NOT NULL, default `now()`                     |
+Comportamento resumido:
 
-**Constraints adicionais:**
+| Forma de pagamento  | `payment_status`           | Receivables                    |
+| ------------------- | -------------------------- | ------------------------------ |
+| cash, pix (à vista) | `paid`                     | nenhum                         |
+| card débito         | `paid`                     | nenhum                         |
+| card crédito        | `paid`                     | nenhum (parcelas informativas) |
+| credit_30_days      | `pending`                  | 1 receivable                   |
+| cash/pix parcelado  | `partially_paid` ou `paid` | N receivables                  |
 
-- CHECK `total = quantity * unit_price`
-- `unit_price` é snapshot do preço no momento da venda
+### `mark_receivable_as_paid` (005 → 011 → 018)
 
----
+- Quita uma parcela ou fiado único
+- Atualiza `sales.payment_status` para `paid` ou `partially_paid`
 
-### `receivables`
+### `cancel_sale` (016 → 018)
 
-| Coluna           | Tipo                | Constraints                        |
-| ---------------- | ------------------- | ---------------------------------- |
-| `id`             | `uuid`              | PK, default `gen_random_uuid()`    |
-| `sale_id`        | `uuid`              | NOT NULL, FK → `sales(id)`, UNIQUE |
-| `customer_id`    | `uuid`              | NOT NULL, FK → `customers(id)`     |
-| `amount`         | `numeric(12,2)`     | NOT NULL, CHECK `> 0`              |
-| `due_date`       | `date`              | NOT NULL                           |
-| `status`         | `receivable_status` | NOT NULL (enum)                    |
-| `paid_at`        | `timestamptz`       | nullable                           |
-| `payment_method` | `payment_method`    | nullable (forma usada na quitação) |
-| `notes`          | `text`              | nullable                           |
-| `created_at`     | `timestamptz`       | NOT NULL, default `now()`          |
-| `updated_at`     | `timestamptz`       | NOT NULL, default `now()`          |
-
-**Notas:**
-
-- Relação 1:1 com `sales` (apenas vendas fiadas geram receivable)
-- `payment_method` na quitação é `cash`, `pix` ou `card` (nunca `credit_30_days`)
-
----
-
-## Índices sugeridos
-
-```sql
--- customers
-CREATE INDEX idx_customers_is_active ON customers (is_active);
-CREATE UNIQUE INDEX idx_customers_cpf ON customers (cpf) WHERE cpf IS NOT NULL;
-
--- products
-CREATE INDEX idx_products_is_active ON products (is_active);
-
--- sales
-CREATE INDEX idx_sales_customer_id ON sales (customer_id);
-CREATE INDEX idx_sales_sale_date ON sales (sale_date DESC);
-CREATE INDEX idx_sales_payment_status ON sales (payment_status);
-
--- sale_items
-CREATE INDEX idx_sale_items_sale_id ON sale_items (sale_id);
-CREATE INDEX idx_sale_items_product_id ON sale_items (product_id);
-
--- receivables
-CREATE INDEX idx_receivables_customer_id ON receivables (customer_id);
-CREATE INDEX idx_receivables_status ON receivables (status);
-CREATE INDEX idx_receivables_due_date ON receivables (due_date) WHERE status IN ('open', 'overdue');
-```
-
----
-
-## Triggers
-
-### `updated_at` automático
-
-Aplicar em: `profiles`, `customers`, `products`, `sales`, `receivables`.
-
-```sql
--- Função genérica set_updated_at()
--- Trigger BEFORE UPDATE em cada tabela
-```
-
-### Sync `profiles` no signup
-
-```sql
--- Trigger AFTER INSERT ON auth.users
--- Insere row em profiles com full_name do metadata ou email
-```
-
----
-
-## Função RPC: `create_sale_with_items`
-
-Transação atômica para criação de venda. Chamada pelo `sales.service.ts`.
-
-**Entrada (JSON):**
-
-- `customer_id`, `sale_date`, `discount`, `payment_method`
-- `items[]`: `{ product_id, quantity }`
-
-**Fluxo interno:**
-
-1. Validar cliente ativo
-2. Para cada item: validar produto ativo e estoque suficiente
-3. Calcular `unit_price` (snapshot de `products.sale_price`), `item.total`, `subtotal`, `total`
-4. Inserir `sales` + `sale_items`
-5. Baixar `products.stock_quantity` de cada item
-6. Se `payment_method = credit_30_days`:
-   - Inserir `receivables` com `amount = total`, `due_date = sale_date + 30`, `status = open`
-   - `sales.payment_status = pending`
-7. Se à vista (`cash`, `pix`, `card`):
-   - `sales.payment_status = paid`
-   - Não criar receivable
-8. Retornar `sale_id` ou erro (rollback automático)
+- Bloqueia se receivable `paid` existir
+- Devolve estoque; `sales.payment_status = cancelled`; receivables `open`/`overdue` → `cancelled`
 
 ---
 
 ## Status `overdue`
 
-**Estratégia MVP:** cálculo na leitura pelo Service.
+Cálculo na leitura pelo Service (sem cron):
 
-Ao listar receivables com `status = open` e `due_date < CURRENT_DATE`:
-
-1. Atualizar `status` para `overdue` via repository
-2. Retornar lista atualizada
-
-Sem job/cron no MVP. Evolução futura: pg_cron diário.
+- `receivables` com `status = open` e `due_date < hoje` → atualizar para `overdue`
 
 ---
 
 ## Política de exclusão
 
-| Tabela        | DELETE físico                                                           |
-| ------------- | ----------------------------------------------------------------------- |
-| `sales`       | **Proibido** — usar `payment_status = cancelled`                        |
-| `sale_items`  | **Proibido**                                                            |
-| `receivables` | **Proibido** — usar `status = cancelled`                                |
-| `customers`   | Permitido apenas se sem vendas vinculadas; preferir `is_active = false` |
-| `products`    | Permitido apenas se sem itens vinculados; preferir `is_active = false`  |
-| `profiles`    | Gerenciado pelo Supabase Auth                                           |
-
-Cancelamento de venda deve devolver estoque (ver `docs/BUSINESS_RULES.md`).
+| Tabela        | DELETE físico                               |
+| ------------- | ------------------------------------------- |
+| `sales`       | **Proibido** — usar cancelamento            |
+| `sale_items`  | **Proibido**                                |
+| `receivables` | **Proibido** — usar `status = cancelled`    |
+| `customers`   | Permitido (014) se sem histórico financeiro |
+| `products`    | Permitido (014) se sem itens vinculados     |
+| `profiles`    | Gerenciado pelo Supabase Auth / admin       |
 
 ---
 
 ## Diagrama de relacionamentos
 
 ```
-profiles (1) ←→ auth.users (1)
+stores (1) ←── (N) profiles
+stores (1) ←── (N) customers, products, sales, receivables
 
 customers (1) ──→ (N) sales
 products  (1) ──→ (N) sale_items
 sales     (1) ──→ (N) sale_items
-sales     (1) ──→ (0..1) receivables
+sales     (1) ──→ (0..N) receivables
 customers (1) ──→ (N) receivables
 ```
 
@@ -270,6 +175,6 @@ customers (1) ──→ (N) receivables
 
 ## Documentação relacionada
 
-- Regras de negócio: `docs/BUSINESS_RULES.md`
-- Segurança / RLS: `docs/SECURITY_SPEC.md`
-- Arquitetura: `docs/SYSTEM_ARCHITECTURE.md`
+- Regras: `docs/BUSINESS_RULES.md`
+- Segurança: `docs/SECURITY_SPEC.md`
+- Migrations: `supabase/MIGRATION_GUIDE.md`

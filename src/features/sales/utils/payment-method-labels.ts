@@ -136,13 +136,3 @@ export function getSalePaymentSummaryLines(
 
   return lines;
 }
-
-/** @deprecated Use getSalePaymentSummaryLines */
-export function getSalePaymentSummaryLabel(
-  payment: SalePaymentSummaryInput,
-  total: number
-): string | null {
-  const lines = getSalePaymentSummaryLines(payment, total);
-
-  return lines.length > 0 ? lines.join(' · ') : null;
-}
