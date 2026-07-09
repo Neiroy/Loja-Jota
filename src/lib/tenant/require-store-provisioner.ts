@@ -1,3 +1,5 @@
+import 'server-only';
+
 import { requireStoreProfile } from '@/lib/tenant/get-current-store';
 
 export type StoreProvisionerErrorCode =

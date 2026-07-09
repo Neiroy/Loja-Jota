@@ -1,3 +1,5 @@
+import 'server-only';
+
 import { cache } from 'react';
 
 import * as authRepository from '@/repositories/auth.repository';

@@ -1,3 +1,5 @@
+import 'server-only';
+
 import { slugify } from '@/lib/utils/slugify';
 import {
   StoreProvisionerError,

@@ -4,17 +4,8 @@ import {
   DEFAULT_AUTHENTICATED_ROUTE,
   DEFAULT_UNAUTHENTICATED_ROUTE,
   PROTECTED_ROUTE_PREFIXES,
-  PUBLIC_ROUTES,
 } from '@/lib/constants/routes';
 import { updateSession } from '@/lib/supabase/middleware';
-
-function isPublicRoute(pathname: string) {
-  return (
-    PUBLIC_ROUTES.some(
-      (route) => pathname === route || pathname.startsWith(`${route}/`)
-    ) || pathname.startsWith('/auth/')
-  );
-}
 
 function isProtectedRoute(pathname: string) {
   return (
@@ -25,7 +16,7 @@ function isProtectedRoute(pathname: string) {
   );
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const { supabaseResponse, user } = await updateSession(request);
 
@@ -51,12 +42,6 @@ export async function middleware(request: NextRequest) {
       : DEFAULT_UNAUTHENTICATED_ROUTE;
 
     return NextResponse.redirect(new URL(destination, request.url));
-  }
-
-  if (!user && !isPublicRoute(pathname) && isProtectedRoute(pathname)) {
-    return NextResponse.redirect(
-      new URL(DEFAULT_UNAUTHENTICATED_ROUTE, request.url)
-    );
   }
 
   return supabaseResponse;
