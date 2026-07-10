@@ -3,10 +3,10 @@ import { cn } from '@/lib/utils';
 import type { SalePaymentStatus } from '@/types/sale.types';
 
 const statusStyles: Record<SalePaymentStatus, string> = {
-  paid: 'border-emerald-200/80 bg-emerald-50 text-emerald-800',
-  pending: 'border-amber-200/80 bg-amber-50 text-amber-800',
-  partially_paid: 'border-stone-300/80 bg-stone-100 text-stone-700',
-  cancelled: 'border-stone-200/80 bg-stone-100 text-stone-600',
+  paid: 'border-emerald-200/90 bg-emerald-50 text-emerald-800',
+  pending: 'border-amber-300/80 bg-amber-50 text-amber-800',
+  partially_paid: 'border-blue-200/90 bg-blue-50 text-blue-800',
+  cancelled: 'border-red-200/80 bg-red-50 text-red-700',
 };
 
 const statusLabels: Record<SalePaymentStatus, string> = {

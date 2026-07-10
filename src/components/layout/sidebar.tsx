@@ -14,7 +14,7 @@ function SidebarBrand({
   logoUrl,
 }: SidebarBrandProps) {
   return (
-    <div className="flex h-16 items-center gap-3.5 border-b border-stone-200/60 px-5 lg:h-[4.75rem]">
+    <div className="flex h-16 items-center gap-3.5 border-b border-stone-200/50 px-5 lg:h-[4.75rem]">
       <StoreBrandMark
         storeName={storeName}
         storeMonogram={storeMonogram}
@@ -25,7 +25,7 @@ function SidebarBrand({
         <span className="block truncate text-base font-semibold tracking-tight text-stone-950">
           {storeName}
         </span>
-        <span className="block truncate text-[13px] leading-tight text-stone-500">
+        <span className="mt-0.5 block truncate text-[12px] leading-tight text-stone-500">
           Controle interno
         </span>
       </div>
@@ -41,13 +41,13 @@ type SidebarProps = {
 
 export function Sidebar({ storeName, storeMonogram, logoUrl }: SidebarProps) {
   return (
-    <aside className="hidden w-[17rem] shrink-0 flex-col border-r border-stone-200/60 bg-white/95 shadow-[1px_0_24px_rgba(28,25,23,0.03)] lg:flex">
+    <aside className="hidden w-[17rem] shrink-0 flex-col border-r border-stone-200/50 bg-[#fbfaf8]/95 shadow-[1px_0_20px_rgba(28,25,23,0.025)] backdrop-blur-sm lg:flex">
       <SidebarBrand
         storeName={storeName}
         storeMonogram={storeMonogram}
         logoUrl={logoUrl}
       />
-      <nav className="flex flex-1 flex-col gap-1 p-4">
+      <nav className="flex flex-1 flex-col gap-0.5 p-3.5">
         {NAV_ITEMS.map((item) => (
           <SidebarNavLink key={item.href} item={item} />
         ))}

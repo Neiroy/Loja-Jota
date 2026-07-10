@@ -7,6 +7,7 @@ import {
 import { ProductStatusBadge } from '@/features/products/components/product-status-badge';
 import { ProductStockBadge } from '@/features/products/components/product-stock-badge';
 import { formatProductPrice } from '@/features/products/utils/format-product-price';
+import { tableActionLinkClassName } from '@/lib/surface';
 import { cn } from '@/lib/utils';
 import type { Product } from '@/types/product.types';
 
@@ -90,7 +91,7 @@ const columns: DataTableColumn<Product>[] = [
     cell: (product) => (
       <Link
         href={`/produtos/${product.id}`}
-        className="text-sm font-medium text-stone-700 hover:text-stone-900 hover:underline"
+        className={tableActionLinkClassName}
       >
         Ver detalhes
       </Link>

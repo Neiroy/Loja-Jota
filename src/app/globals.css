@@ -49,7 +49,7 @@
 }
 
 :root {
-  --background: #f7f6f3;
+  --background: #f5f4f1;
   --foreground: oklch(0.205 0.006 56);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.205 0.006 56);
@@ -131,7 +131,7 @@
 
 @layer components {
   .surface-card {
-    @apply rounded-xl border border-stone-200/60 bg-white shadow-[0_1px_2px_rgba(28,25,23,0.03),0_6px_24px_rgba(28,25,23,0.04)];
+    @apply rounded-[1.05rem] border border-stone-200/65 bg-white shadow-[0_1px_2px_rgba(28,25,23,0.03),0_6px_20px_rgba(28,25,23,0.04)];
   }
 
   .surface-muted {
@@ -139,26 +139,26 @@
   }
 
   .auth-shell {
-    background-color: #f7f6f3;
+    background-color: #f5f4f1;
     background-image:
       radial-gradient(
         ellipse 90% 70% at 50% -20%,
-        rgba(231, 229, 228, 0.55),
+        rgba(231, 229, 228, 0.5),
         transparent 70%
       ),
       radial-gradient(
         ellipse 50% 45% at 100% 100%,
-        rgba(214, 211, 209, 0.25),
+        rgba(214, 211, 209, 0.22),
         transparent 65%
       ),
       radial-gradient(
         ellipse 40% 40% at 0% 80%,
-        rgba(231, 229, 228, 0.3),
+        rgba(231, 229, 228, 0.28),
         transparent 60%
       );
   }
 
   .page-stack {
-    @apply space-y-6 sm:space-y-7;
+    @apply space-y-5 sm:space-y-6 lg:space-y-7;
   }
 }

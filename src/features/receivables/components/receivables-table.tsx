@@ -7,6 +7,7 @@ import {
 import { ReceivableStatusBadge } from '@/features/receivables/components/receivable-status-badge';
 import { formatReceivableDate } from '@/features/receivables/utils/format-receivable-date';
 import { formatProductPrice } from '@/features/products/utils/format-product-price';
+import { tableActionLinkClassName } from '@/lib/surface';
 import type { ReceivableListRow } from '@/types/receivable.types';
 
 const columns: DataTableColumn<ReceivableListRow>[] = [
@@ -58,7 +59,7 @@ const columns: DataTableColumn<ReceivableListRow>[] = [
     cell: (receivable) => (
       <Link
         href={`/fiados/${receivable.id}`}
-        className="text-sm font-medium text-stone-700 hover:text-stone-900 hover:underline"
+        className={tableActionLinkClassName}
       >
         Ver detalhes
       </Link>

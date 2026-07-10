@@ -9,6 +9,7 @@ import { SaleHistoricalBadge } from '@/features/sales/components/sale-historical
 import { SalePaymentStatusBadge } from '@/features/sales/components/sale-payment-status-badge';
 import { formatSaleDate } from '@/features/sales/utils/format-sale-date';
 import { formatProductPrice } from '@/features/products/utils/format-product-price';
+import { tableActionLinkClassName } from '@/lib/surface';
 import type { SaleListRow } from '@/types/sale.types';
 
 const columns: DataTableColumn<SaleListRow>[] = [
@@ -62,10 +63,7 @@ const columns: DataTableColumn<SaleListRow>[] = [
     header: '',
     className: 'text-right',
     cell: (sale) => (
-      <Link
-        href={`/vendas/${sale.id}`}
-        className="text-sm font-medium text-stone-700 hover:text-stone-900 hover:underline"
-      >
+      <Link href={`/vendas/${sale.id}`} className={tableActionLinkClassName}>
         Ver detalhes
       </Link>
     ),

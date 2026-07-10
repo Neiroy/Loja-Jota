@@ -23,20 +23,22 @@ export function EmptyState({
     <div
       className={cn(
         surfaceCardClassName,
-        'flex flex-col items-center justify-center border-dashed px-6 py-16 text-center sm:py-20',
+        'flex flex-col items-center justify-center border-dashed border-stone-200/70 px-6 py-16 text-center sm:py-20',
         className
       )}
     >
-      <div className="mb-5 flex size-14 items-center justify-center rounded-full bg-stone-100/90 ring-1 ring-stone-200/60">
-        <Icon className="size-6 text-stone-500" />
+      <div className="mb-5 flex size-12 items-center justify-center rounded-2xl bg-stone-100/80 ring-1 ring-stone-200/50">
+        <Icon className="size-5 text-stone-500" strokeWidth={1.75} />
       </div>
-      <h3 className="text-base font-semibold text-stone-900">{title}</h3>
+      <h3 className="text-base font-semibold tracking-tight text-stone-950">
+        {title}
+      </h3>
       {description ? (
-        <p className="mt-2 max-w-md text-sm leading-relaxed text-stone-500">
+        <p className="mt-2 max-w-sm text-sm leading-relaxed text-stone-500">
           {description}
         </p>
       ) : null}
-      {action ? <div className="mt-7">{action}</div> : null}
+      {action ? <div className="mt-6">{action}</div> : null}
     </div>
   );
 }

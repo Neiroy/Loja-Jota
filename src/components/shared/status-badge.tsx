@@ -6,10 +6,10 @@ import { cn } from '@/lib/utils';
 const statusBadgeVariants = cva(badgeBaseClassName, {
   variants: {
     variant: {
-      paid: 'border-emerald-200/80 bg-emerald-50 text-emerald-800',
-      open: 'border-amber-200/80 bg-amber-50 text-amber-800',
-      overdue: 'border-red-200/70 bg-red-50 text-red-800',
-      cancelled: 'border-stone-200/80 bg-stone-100 text-stone-600',
+      paid: 'border-emerald-200/90 bg-emerald-50 text-emerald-800',
+      open: 'border-orange-200/90 bg-orange-50 text-orange-800',
+      overdue: 'border-red-300/90 bg-red-50 text-red-800',
+      cancelled: 'border-red-200/70 bg-red-50/80 text-red-700',
     },
   },
   defaultVariants: {

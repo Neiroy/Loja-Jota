@@ -14,7 +14,7 @@ export function SaleHistoricalBadge({
     <span
       className={cn(
         badgeBaseClassName,
-        'border-stone-300/80 bg-stone-100 text-stone-700',
+        'border-purple-200/90 bg-purple-50 text-purple-800',
         className
       )}
     >

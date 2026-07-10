@@ -6,6 +6,7 @@ import {
 } from '@/components/shared/data-table';
 import { CustomerStatusBadge } from '@/features/customers/components/customer-status-badge';
 import { formatCpfDisplay, formatPhoneDisplay } from '@/lib/formatters';
+import { tableActionLinkClassName } from '@/lib/surface';
 import { cn } from '@/lib/utils';
 import type { Customer } from '@/types/customer.types';
 
@@ -65,7 +66,7 @@ const columns: DataTableColumn<Customer>[] = [
     cell: (customer) => (
       <Link
         href={`/clientes/${customer.id}`}
-        className="text-sm font-medium text-stone-700 hover:text-stone-900 hover:underline"
+        className={tableActionLinkClassName}
       >
         Ver detalhes
       </Link>

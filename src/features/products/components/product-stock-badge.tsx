@@ -1,4 +1,5 @@
 import { LOW_STOCK_THRESHOLD } from '@/features/products/constants/stock';
+import { badgeBaseClassName } from '@/lib/surface';
 import { cn } from '@/lib/utils';
 
 type StockLevel = 'out' | 'low' | 'ok';
@@ -16,9 +17,9 @@ function getStockLevel(quantity: number): StockLevel {
 }
 
 const stockStyles: Record<StockLevel, string> = {
-  out: 'border-red-200 bg-red-50 text-red-700',
-  low: 'border-amber-200 bg-amber-50 text-amber-700',
-  ok: 'border-emerald-200 bg-emerald-50 text-emerald-700',
+  out: 'border-red-300/90 bg-red-50 text-red-800',
+  low: 'border-amber-300/80 bg-amber-50 text-amber-800',
+  ok: 'border-emerald-200/90 bg-emerald-50 text-emerald-800',
 };
 
 const stockLabels: Record<StockLevel, string> = {
@@ -53,13 +54,7 @@ export function ProductStockBadge({
   const label = compact ? compactStockLabels[level] : stockLabels[level];
 
   return (
-    <span
-      className={cn(
-        'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium',
-        stockStyles[level],
-        className
-      )}
-    >
+    <span className={cn(badgeBaseClassName, stockStyles[level], className)}>
       {label}
     </span>
   );
