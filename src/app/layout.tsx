@@ -8,7 +8,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'Sistema Controle Loja Jota',
+  title: 'Sistema Controle de Vendas',
   description: 'Sistema interno de controle de vendas, clientes e fiado',
 };
 
