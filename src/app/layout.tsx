@@ -10,6 +10,9 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: 'Sistema Controle de Vendas',
   description: 'Sistema interno de controle de vendas, clientes e fiado',
+  icons: {
+    icon: '/favicon.svg',
+  },
 };
 
 export default function RootLayout({

@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none" role="img" aria-label="Sistema Controle de Vendas">
+  <rect width="32" height="32" rx="5" fill="#134E2A"/>
+  <path
+    d="M7 21.5V14.5C7 14.2239 7.22386 14 7.5 14H9.5C9.77614 14 10 14.2239 10 14.5V21.5C10 21.7761 9.77614 22 9.5 22H7.5C7.22386 22 7 21.7761 7 21.5Z"
+    fill="#FFFFFF"
+  />
+  <path
+    d="M12 21.5V11.5C12 11.2239 12.2239 11 12.5 11H14.5C14.7761 11 15 11.2239 15 11.5V21.5C15 21.7761 14.7761 22 14.5 22H12.5C12.2239 22 12 21.7761 12 21.5Z"
+    fill="#FFFFFF"
+  />
+  <path
+    d="M17 21.5V8.5C17 8.22386 17.2239 8 17.5 8H19.5C19.7761 8 20 8.22386 20 8.5V21.5C20 21.7761 19.7761 22 19.5 22H17.5C17.2239 22 17 21.7761 17 21.5Z"
+    fill="#FFFFFF"
+  />
+  <path
+    d="M8.5 13.5L13.5 10L18.5 7.5L23 5"
+    stroke="#FFFFFF"
+    stroke-width="1.75"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <path
+    d="M20.5 5H23V7.5"
+    stroke="#FFFFFF"
+    stroke-width="1.75"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <text
+    x="16"
+    y="28.5"
+    fill="#FFFFFF"
+    font-family="system-ui, -apple-system, Segoe UI, sans-serif"
+    font-size="5.5"
+    font-weight="700"
+    letter-spacing="0.4"
+    text-anchor="middle"
+  >
+    CV
+  </text>
+</svg>
