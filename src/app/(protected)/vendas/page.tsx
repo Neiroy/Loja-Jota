@@ -32,9 +32,17 @@ export default async function VendasPage({ searchParams }: VendasPageProps) {
         title="Vendas"
         description="Registro interno de vendas da loja."
         action={
-          <Link href="/vendas/nova" className={cn(buttonVariants())}>
-            Nova venda
-          </Link>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Link
+              href="/vendas/lancar-antiga"
+              className={cn(buttonVariants({ variant: 'outline' }))}
+            >
+              Lançar venda antiga
+            </Link>
+            <Link href="/vendas/nova" className={cn(buttonVariants())}>
+              Nova venda
+            </Link>
+          </div>
         }
       />
 

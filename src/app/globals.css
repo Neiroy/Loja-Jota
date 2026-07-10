@@ -131,11 +131,11 @@
 
 @layer components {
   .surface-card {
-    @apply rounded-xl border border-stone-200/70 bg-white shadow-[0_1px_2px_rgba(28,25,23,0.04),0_4px_20px_rgba(28,25,23,0.05)];
+    @apply rounded-xl border border-stone-200/60 bg-white shadow-[0_1px_2px_rgba(28,25,23,0.03),0_6px_24px_rgba(28,25,23,0.04)];
   }
 
   .surface-muted {
-    @apply bg-stone-50/80;
+    @apply bg-stone-50/70;
   }
 
   .auth-shell {
@@ -159,6 +159,6 @@
   }
 
   .page-stack {
-    @apply space-y-7;
+    @apply space-y-6 sm:space-y-7;
   }
 }

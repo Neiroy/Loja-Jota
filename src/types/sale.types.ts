@@ -4,6 +4,8 @@ export type {
   SaleInsert,
   SaleItem,
   SaleItemInsert,
+  HistoricalSaleItem,
+  HistoricalSaleItemInsert,
   SalePaymentStatus,
 } from '@/types/database.types';
 
@@ -31,6 +33,8 @@ export type SaleListRow = {
   installments_count: number | null;
   down_payment: number;
   financing_installments_count: number | null;
+  is_historical: boolean;
+  notes: string | null;
   created_at: string;
   updated_at: string;
   customer_name: string;
@@ -50,6 +54,17 @@ export type SaleItemWithProduct = {
   product_color: string | null;
 };
 
+export type HistoricalSaleItemRow = {
+  id: string;
+  sale_id: string;
+  product_id: string | null;
+  description: string;
+  quantity: number;
+  unit_price: number;
+  total: number;
+  created_at: string;
+};
+
 export type SaleDetail = {
   id: string;
   customer_id: string;
@@ -63,10 +78,13 @@ export type SaleDetail = {
   installments_count: number | null;
   down_payment: number;
   financing_installments_count: number | null;
+  is_historical: boolean;
+  notes: string | null;
   created_at: string;
   updated_at: string;
   customer_name: string;
   items: SaleItemWithProduct[];
+  historical_items: HistoricalSaleItemRow[];
   receivables: SaleReceivableSummary[];
 };
 
@@ -84,4 +102,23 @@ export type CreateSaleRpcInput = {
   down_payment: number;
   financing_installments_count: number | null;
   items: CreateSaleRpcItem[];
+};
+
+export type CreateHistoricalSaleRpcItem = {
+  description: string;
+  quantity: number;
+  unit_price: number;
+  product_id?: string | null;
+};
+
+export type CreateHistoricalSaleRpcInput = {
+  customer_id: string;
+  sale_date: string;
+  total: number;
+  down_payment: number;
+  payment_method: import('@/types/database.types').PaymentMethod;
+  pending_installments: number | null;
+  first_due_date: string | null;
+  notes: string | null;
+  items: CreateHistoricalSaleRpcItem[];
 };

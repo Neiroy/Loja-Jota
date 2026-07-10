@@ -18,12 +18,12 @@ export function PageHeader({
     <div
       className={cn(
         surfaceCardClassName,
-        'mb-8 flex min-w-0 flex-col gap-4 p-6 sm:flex-row sm:items-start sm:justify-between sm:p-7',
+        'mb-6 flex min-w-0 flex-col gap-4 p-5 sm:mb-8 sm:flex-row sm:items-start sm:justify-between sm:p-6 lg:p-7',
         className
       )}
     >
-      <div className="min-w-0 space-y-2">
-        <h1 className="text-2xl font-semibold tracking-tight text-stone-900 sm:text-[1.875rem]">
+      <div className="min-w-0 space-y-1.5">
+        <h1 className="text-2xl font-semibold tracking-tight text-stone-900 sm:text-[1.75rem]">
           {title}
         </h1>
         {description ? (

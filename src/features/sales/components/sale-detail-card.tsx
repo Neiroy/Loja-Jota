@@ -2,6 +2,7 @@ import Link from 'next/link';
 
 import { DetailField } from '@/components/shared/detail-field';
 import { FormSection } from '@/components/shared/form-section';
+import { SaleHistoricalBadge } from '@/features/sales/components/sale-historical-badge';
 import { PaymentMethodBadge } from '@/features/sales/components/payment-method-badge';
 import { SalePaymentStatusBadge } from '@/features/sales/components/sale-payment-status-badge';
 import { formatSaleDate } from '@/features/sales/utils/format-sale-date';
@@ -49,7 +50,12 @@ export function SaleDetailCard({ sale }: SaleDetailCardProps) {
         />
         <DetailField
           label="Status do pagamento"
-          value={<SalePaymentStatusBadge status={sale.payment_status} />}
+          value={
+            <div className="flex flex-wrap items-center gap-2">
+              <SalePaymentStatusBadge status={sale.payment_status} />
+              {sale.is_historical ? <SaleHistoricalBadge /> : null}
+            </div>
+          }
         />
         {sale.down_payment > 0 ? (
           <DetailField
@@ -66,6 +72,13 @@ export function SaleDetailCard({ sale }: SaleDetailCardProps) {
           value={formatProductPrice(sale.discount)}
         />
         <DetailField label="Total" value={formatProductPrice(sale.total)} />
+        {sale.notes ? (
+          <DetailField
+            label="Observação"
+            value={<span className="break-words">{sale.notes}</span>}
+            className="sm:col-span-2"
+          />
+        ) : null}
         <DetailField
           label="Registrada em"
           value={new Intl.DateTimeFormat('pt-BR', {

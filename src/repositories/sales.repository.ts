@@ -1,7 +1,9 @@
 import { createClient } from '@/lib/supabase/server';
 import type { ListSalesFilters } from '@/schemas/sale.schema';
 import type {
+  CreateHistoricalSaleRpcInput,
   CreateSaleRpcInput,
+  HistoricalSaleItemRow,
   SaleDetail,
   SaleListRow,
   SaleReceivableSummary,
@@ -20,6 +22,8 @@ type SaleListQueryRow = {
   installments_count: SaleListRow['installments_count'];
   down_payment: number | string;
   financing_installments_count: SaleListRow['financing_installments_count'];
+  is_historical: boolean;
+  notes: string | null;
   created_at: string;
   updated_at: string;
   customers: { name: string } | { name: string }[] | null;
@@ -47,6 +51,8 @@ type SaleDetailQueryRow = {
   installments_count: SaleDetail['installments_count'];
   down_payment: number | string;
   financing_installments_count: SaleDetail['financing_installments_count'];
+  is_historical: boolean;
+  notes: string | null;
   created_at: string;
   updated_at: string;
   customers: { name: string } | { name: string }[] | null;
@@ -73,6 +79,16 @@ type SaleDetailQueryRow = {
         }[]
       | null;
   }>;
+  historical_sale_items: Array<{
+    id: string;
+    sale_id: string;
+    product_id: string | null;
+    description: string;
+    quantity: number;
+    unit_price: number | string;
+    total: number | string;
+    created_at: string;
+  }> | null;
   receivables: SaleReceivableQueryRow[] | null;
 };
 
@@ -113,9 +129,33 @@ function mapSaleListRow(row: SaleListQueryRow): SaleListRow {
     installments_count: row.installments_count,
     down_payment: Number(row.down_payment),
     financing_installments_count: row.financing_installments_count,
+    is_historical: row.is_historical,
+    notes: row.notes,
     created_at: row.created_at,
     updated_at: row.updated_at,
     customer_name: customer?.name ?? 'Cliente',
+  };
+}
+
+function mapHistoricalSaleItem(row: {
+  id: string;
+  sale_id: string;
+  product_id: string | null;
+  description: string;
+  quantity: number;
+  unit_price: number | string;
+  total: number | string;
+  created_at: string;
+}): HistoricalSaleItemRow {
+  return {
+    id: row.id,
+    sale_id: row.sale_id,
+    product_id: row.product_id,
+    description: row.description,
+    quantity: row.quantity,
+    unit_price: Number(row.unit_price),
+    total: Number(row.total),
+    created_at: row.created_at,
   };
 }
 
@@ -138,6 +178,8 @@ function mapSaleDetail(row: SaleDetailQueryRow): SaleDetail {
     installments_count: row.installments_count,
     down_payment: Number(row.down_payment),
     financing_installments_count: row.financing_installments_count,
+    is_historical: row.is_historical,
+    notes: row.notes,
     created_at: row.created_at,
     updated_at: row.updated_at,
     customer_name: customer?.name ?? 'Cliente',
@@ -158,6 +200,9 @@ function mapSaleDetail(row: SaleDetailQueryRow): SaleDetail {
         product_color: product?.color ?? null,
       };
     }),
+    historical_items: (row.historical_sale_items ?? []).map(
+      mapHistoricalSaleItem
+    ),
     receivables: receivables.map(mapReceivableSummary),
   };
 }
@@ -188,6 +233,8 @@ export async function findAll(
         installments_count,
         down_payment,
         financing_installments_count,
+        is_historical,
+        notes,
         created_at,
         updated_at,
         customers ( name )
@@ -240,6 +287,8 @@ export async function findByIdWithDetails(storeId: string, id: string) {
         installments_count,
         down_payment,
         financing_installments_count,
+        is_historical,
+        notes,
         created_at,
         updated_at,
         customers ( name ),
@@ -252,6 +301,16 @@ export async function findByIdWithDetails(storeId: string, id: string) {
           total,
           created_at,
           products ( name, category, size, color )
+        ),
+        historical_sale_items (
+          id,
+          sale_id,
+          product_id,
+          description,
+          quantity,
+          unit_price,
+          total,
+          created_at
         ),
         receivables (
           id,
@@ -281,6 +340,41 @@ export async function createSaleWithItems(input: CreateSaleRpcInput) {
     p_down_payment: input.down_payment,
     p_financing_installments_count: input.financing_installments_count,
   });
+}
+
+export async function createHistoricalSale(
+  input: CreateHistoricalSaleRpcInput
+) {
+  const supabase = await createClient();
+
+  const rpcPayload = {
+    p_customer_id: input.customer_id,
+    p_sale_date: input.sale_date,
+    p_total: input.total,
+    p_down_payment: input.down_payment,
+    p_payment_method: input.payment_method,
+    p_pending_installments: input.pending_installments,
+    p_first_due_date: input.first_due_date,
+    p_notes: input.notes,
+    p_items: input.items,
+  };
+
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[historical-sale] rpc payload', rpcPayload);
+  }
+
+  const result = await supabase.rpc('create_historical_sale', rpcPayload);
+
+  if (result.error && process.env.NODE_ENV === 'development') {
+    console.error('[historical-sale] rpc error', {
+      message: result.error.message,
+      details: result.error.details,
+      hint: result.error.hint,
+      code: result.error.code,
+    });
+  }
+
+  return result;
 }
 
 export async function cancelSale(saleId: string) {

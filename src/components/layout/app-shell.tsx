@@ -23,7 +23,7 @@ export async function AppShell({ children }: AppShellProps) {
           logoUrl={branding.logoUrl}
         />
         <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
-          <div className="mx-auto w-full max-w-[100rem] px-4 py-6 sm:px-6 lg:px-8 lg:py-8 xl:px-10">
+          <div className="mx-auto w-full max-w-[100rem] px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 xl:px-10">
             {children}
           </div>
         </main>

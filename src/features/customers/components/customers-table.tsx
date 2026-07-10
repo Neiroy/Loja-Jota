@@ -5,20 +5,9 @@ import {
   type DataTableColumn,
 } from '@/components/shared/data-table';
 import { CustomerStatusBadge } from '@/features/customers/components/customer-status-badge';
+import { formatCpfDisplay, formatPhoneDisplay } from '@/lib/formatters';
 import { cn } from '@/lib/utils';
 import type { Customer } from '@/types/customer.types';
-
-function formatCpf(cpf: string | null) {
-  if (!cpf) {
-    return '—';
-  }
-
-  if (cpf.length !== 11) {
-    return cpf;
-  }
-
-  return `${cpf.slice(0, 3)}.${cpf.slice(3, 6)}.${cpf.slice(6, 9)}-${cpf.slice(9)}`;
-}
 
 const columns: DataTableColumn<Customer>[] = [
   {
@@ -40,24 +29,27 @@ const columns: DataTableColumn<Customer>[] = [
   {
     key: 'phone',
     header: 'Telefone',
-    cell: (customer) => (
-      <span
-        className={cn(
-          'block max-w-[9rem] truncate sm:max-w-[12rem]',
-          customer.is_active ? undefined : 'text-stone-500'
-        )}
-        title={customer.phone ?? undefined}
-      >
-        {customer.phone ?? '—'}
-      </span>
-    ),
+    cell: (customer) => {
+      const phone = formatPhoneDisplay(customer.phone);
+      return (
+        <span
+          className={cn(
+            'block max-w-[9rem] truncate sm:max-w-[12rem]',
+            customer.is_active ? undefined : 'text-stone-500'
+          )}
+          title={phone === '—' ? undefined : phone}
+        >
+          {phone}
+        </span>
+      );
+    },
   },
   {
     key: 'cpf',
     header: 'CPF',
     cell: (customer) => (
       <span className={customer.is_active ? undefined : 'text-stone-500'}>
-        {formatCpf(customer.cpf)}
+        {formatCpfDisplay(customer.cpf)}
       </span>
     ),
   },
@@ -83,19 +75,15 @@ const columns: DataTableColumn<Customer>[] = [
 
 type CustomersTableProps = {
   customers: Customer[];
-  emptyMessage?: string;
 };
 
-export function CustomersTable({
-  customers,
-  emptyMessage = 'Nenhum cliente encontrado.',
-}: CustomersTableProps) {
+export function CustomersTable({ customers }: CustomersTableProps) {
   return (
     <DataTable
       columns={columns}
       data={customers}
       getRowKey={(customer) => customer.id}
-      emptyMessage={emptyMessage}
+      emptyMessage="Nenhum cliente encontrado."
     />
   );
 }

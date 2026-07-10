@@ -45,7 +45,11 @@ export default async function VendaDetalhePage({
         }
       />
       <SaleDetailCard sale={sale} />
-      <SaleItemsTable items={sale.items} />
+      <SaleItemsTable
+        items={sale.items}
+        historicalItems={sale.historical_items}
+        isHistorical={sale.is_historical}
+      />
       <SaleReceivableSummary sale={sale} />
     </div>
   );

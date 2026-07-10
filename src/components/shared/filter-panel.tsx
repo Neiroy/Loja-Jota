@@ -14,7 +14,7 @@ export function FilterPanel({
     <form
       className={cn(
         surfaceCardClassName,
-        'flex flex-col gap-5 p-5 sm:flex-row sm:flex-wrap sm:items-end sm:p-6',
+        'flex flex-col gap-4 p-4 sm:flex-row sm:flex-wrap sm:items-end sm:gap-5 sm:p-5 lg:p-6',
         className
       )}
       {...props}

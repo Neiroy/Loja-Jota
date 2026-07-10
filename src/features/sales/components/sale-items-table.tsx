@@ -4,7 +4,10 @@ import {
 } from '@/components/shared/data-table';
 import { FormSection } from '@/components/shared/form-section';
 import { formatProductPrice } from '@/features/products/utils/format-product-price';
-import type { SaleItemWithProduct } from '@/types/sale.types';
+import type {
+  HistoricalSaleItemRow,
+  SaleItemWithProduct,
+} from '@/types/sale.types';
 
 function formatProductDetails(item: SaleItemWithProduct) {
   const details = [item.product_category, item.product_size, item.product_color]
@@ -14,7 +17,7 @@ function formatProductDetails(item: SaleItemWithProduct) {
   return details ? `${item.product_name} (${details})` : item.product_name;
 }
 
-const columns: DataTableColumn<SaleItemWithProduct>[] = [
+const normalColumns: DataTableColumn<SaleItemWithProduct>[] = [
   {
     key: 'product_name',
     header: 'Produto',
@@ -39,15 +42,57 @@ const columns: DataTableColumn<SaleItemWithProduct>[] = [
   },
 ];
 
+const historicalColumns: DataTableColumn<HistoricalSaleItemRow>[] = [
+  {
+    key: 'description',
+    header: 'Produto',
+    cell: (item) => <span className="font-medium">{item.description}</span>,
+  },
+  {
+    key: 'quantity',
+    header: 'Qtd.',
+    cell: (item) => item.quantity,
+  },
+  {
+    key: 'unit_price',
+    header: 'Preço unit.',
+    cell: (item) => formatProductPrice(item.unit_price),
+  },
+  {
+    key: 'total',
+    header: 'Total',
+    cell: (item) => formatProductPrice(item.total),
+  },
+];
+
 type SaleItemsTableProps = {
   items: SaleItemWithProduct[];
+  historicalItems?: HistoricalSaleItemRow[];
+  isHistorical?: boolean;
 };
 
-export function SaleItemsTable({ items }: SaleItemsTableProps) {
+export function SaleItemsTable({
+  items,
+  historicalItems = [],
+  isHistorical = false,
+}: SaleItemsTableProps) {
+  if (isHistorical) {
+    return (
+      <FormSection title="Itens da venda">
+        <DataTable
+          columns={historicalColumns}
+          data={historicalItems}
+          getRowKey={(item) => item.id}
+          emptyMessage="Venda histórica lançada manualmente, sem produtos vinculados."
+        />
+      </FormSection>
+    );
+  }
+
   return (
     <FormSection title="Itens da venda">
       <DataTable
-        columns={columns}
+        columns={normalColumns}
         data={items}
         getRowKey={(item) => item.id}
         emptyMessage="Nenhum item encontrado."

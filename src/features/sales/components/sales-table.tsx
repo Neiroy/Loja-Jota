@@ -5,6 +5,7 @@ import {
   type DataTableColumn,
 } from '@/components/shared/data-table';
 import { PaymentMethodBadge } from '@/features/sales/components/payment-method-badge';
+import { SaleHistoricalBadge } from '@/features/sales/components/sale-historical-badge';
 import { SalePaymentStatusBadge } from '@/features/sales/components/sale-payment-status-badge';
 import { formatSaleDate } from '@/features/sales/utils/format-sale-date';
 import { formatProductPrice } from '@/features/products/utils/format-product-price';
@@ -50,7 +51,10 @@ const columns: DataTableColumn<SaleListRow>[] = [
     key: 'payment_status',
     header: 'Status',
     cell: (sale) => (
-      <SalePaymentStatusBadge status={sale.payment_status} compact />
+      <div className="flex flex-wrap items-center gap-1.5">
+        <SalePaymentStatusBadge status={sale.payment_status} compact />
+        {sale.is_historical ? <SaleHistoricalBadge compact /> : null}
+      </div>
     ),
   },
   {

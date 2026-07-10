@@ -81,6 +81,8 @@ export type Sale = {
   installments_count: number | null;
   down_payment: number;
   financing_installments_count: number | null;
+  is_historical: boolean;
+  notes: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -90,6 +92,18 @@ export type SaleItem = {
   store_id: string;
   sale_id: string;
   product_id: string;
+  quantity: number;
+  unit_price: number;
+  total: number;
+  created_at: string;
+};
+
+export type HistoricalSaleItem = {
+  id: string;
+  store_id: string;
+  sale_id: string;
+  product_id: string | null;
+  description: string;
   quantity: number;
   unit_price: number;
   total: number;
@@ -162,6 +176,12 @@ export type SaleItemInsert = Pick<
   'store_id' | 'sale_id' | 'product_id' | 'quantity' | 'unit_price' | 'total'
 >;
 
+export type HistoricalSaleItemInsert = Pick<
+  HistoricalSaleItem,
+  'store_id' | 'sale_id' | 'description' | 'quantity' | 'unit_price' | 'total'
+> &
+  Partial<Pick<HistoricalSaleItem, 'product_id'>>;
+
 export type ReceivableInsert = Pick<
   Receivable,
   'store_id' | 'sale_id' | 'customer_id' | 'amount' | 'due_date' | 'status'
@@ -207,6 +227,11 @@ export type Database = {
       sale_items: {
         Row: SaleItem;
         Insert: SaleItemInsert;
+        Update: never;
+      };
+      historical_sale_items: {
+        Row: HistoricalSaleItem;
+        Insert: HistoricalSaleItemInsert;
         Update: never;
       };
       receivables: {

@@ -6,7 +6,11 @@ export function digitsOnly(value: string): string {
 /** Alias de digitsOnly. */
 export const onlyDigits = digitsOnly;
 
-/** Máscara visual: (00) 00000-0000 — até 11 dígitos (celular). */
+/**
+ * Máscara visual de telefone BR.
+ * - até 10 dígitos: (00) 0000-0000
+ * - 11 dígitos: (00) 00000-0000
+ */
 export function maskPhone(value: string): string {
   const digits = digitsOnly(value).slice(0, 11);
 
@@ -18,8 +22,12 @@ export function maskPhone(value: string): string {
     return `(${digits}`;
   }
 
-  if (digits.length <= 7) {
+  if (digits.length <= 6) {
     return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+  }
+
+  if (digits.length <= 10) {
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
   }
 
   return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
@@ -104,7 +112,7 @@ export function onlyIntegerString(value: string): string {
 
 /**
  * Máscara visual de data BR: 00/00/0000
- * Pronta para uso futuro — não aplicada em campos atuais.
+ * Uso principal em digitação livre; formulários atuais preferem input type="date".
  */
 export function maskDateBR(value: string): string {
   const digits = digitsOnly(value).slice(0, 8);
